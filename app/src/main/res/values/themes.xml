@@ -1,0 +1,10 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!--
+      Base Activity theme. Real theming lives in Compose (ui/theme/Theme.kt); this only
+      styles the window before Compose draws. AppCompat parent is required for the per-app
+      locale (AppCompatDelegate.setApplicationLocales) support. DayNight follows the system.
+    -->
+    <style name="Theme.GymApp" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">?android:attr/colorBackground</item>
+    </style>
+</resources>

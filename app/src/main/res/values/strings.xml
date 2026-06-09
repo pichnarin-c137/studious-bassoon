@@ -1,0 +1,166 @@
+<resources>
+    <string name="app_name">GymApp</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_checkin">Check-in</string>
+    <string name="nav_membership">Membership</string>
+    <string name="nav_progress">Progress</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_activity">Activity</string>
+    <string name="nav_log">Log</string>
+    <string name="nav_log_cd">Log workout</string>
+
+    <!-- Login -->
+    <string name="login_welcome">Welcome back</string>
+    <string name="login_subtext">Sign in with the member ID and password from your gym branch.</string>
+    <string name="login_member_id">Member ID</string>
+    <string name="login_member_id_hint">e.g. PPC-04821</string>
+    <string name="login_password">Password</string>
+    <string name="login_sign_in">Sign in</string>
+    <string name="login_error">That member ID or password isn\'t right. Check the slip from your branch.</string>
+    <string name="login_new_here_title">New here?</string>
+    <string name="login_new_here_body">Your branch sets up your account at the front desk and hands you a login. No sign-up needed.</string>
+    <string name="login_forgot">Forgot password? Ask your branch</string>
+    <string name="login_show_password">Show password</string>
+    <string name="login_hide_password">Hide password</string>
+
+    <!-- Common -->
+    <string name="common_loading">Loading…</string>
+    <string name="common_error_title">Something went wrong</string>
+    <string name="common_error_body">We couldn\'t load your data. Please try again.</string>
+    <string name="common_retry">Retry</string>
+    <string name="common_view_all">View all</string>
+
+    <!-- Membership status -->
+    <string name="status_active">Active</string>
+    <string name="status_expiring">Expiring soon</string>
+    <string name="status_expired">Expired</string>
+    <string name="status_frozen">Frozen</string>
+
+    <!-- Home -->
+    <string name="home_welcome">Welcome back</string>
+    <string name="home_greeting">Hi, %1$s</string>
+    <string name="home_member_id">Member ID</string>
+    <string name="home_days_left">%1$d days left</string>
+    <string name="home_expired_label">Membership expired</string>
+    <string name="home_quick_stats">Quick stats</string>
+    <string name="home_stat_streak">Day streak</string>
+    <string name="home_stat_visits">Total visits</string>
+    <string name="home_stat_month">This month</string>
+    <string name="home_unit_days">days</string>
+    <string name="home_unit_visits">visits</string>
+    <string name="home_show_qr">Show check-in QR</string>
+    <string name="home_section_membership">Membership</string>
+    <string name="home_plan_branch">%1$s · %2$s</string>
+    <string name="home_renew_nudge">Renews soon — visit your branch to extend.</string>
+    <string name="home_section_week">This week</string>
+    <string name="home_week_summary">%1$d of %2$d sessions</string>
+    <string name="home_start_workout">Start workout</string>
+    <string name="home_days_left_label">Days left</string>
+    <string name="home_metric_streak">Streak</string>
+    <string name="home_metric_visits">Visits</string>
+    <string name="home_metric_month">Month</string>
+    <string name="home_entry_qr">Entry QR</string>
+    <string name="home_entry_qr_hint">Tap to scan in at the door</string>
+    <string name="home_gym_section">At the gym</string>
+    <string name="home_right_now">Right now</string>
+    <string name="home_closes_at">closes %1$s</string>
+    <string name="home_coach">Coach</string>
+    <string name="branch_open">Open</string>
+    <string name="branch_closed">Closed</string>
+    <string name="busy_quiet">Quiet</string>
+    <string name="busy_moderate">Moderate</string>
+    <string name="busy_busy">Busy</string>
+    <string name="busy_caption_quiet">Good time to lift</string>
+    <string name="busy_caption_moderate">Filling up</string>
+    <string name="busy_caption_busy">Busy right now</string>
+
+    <!-- Check-in -->
+    <string name="checkin_title">Check-in</string>
+    <string name="checkin_your_qr">Your member QR</string>
+    <string name="checkin_instruction">Show this code at the gym entrance to check in.</string>
+    <string name="checkin_visit_history">Visit history</string>
+    <string name="checkin_scan_button">Scan to check in</string>
+    <string name="checkin_scan_unavailable">Camera scanning is coming soon.</string>
+
+    <!-- Membership -->
+    <string name="membership_title">Membership</string>
+    <string name="membership_current_plan">Current plan</string>
+    <string name="membership_renews">Renews %1$s</string>
+    <string name="membership_price">%1$s / %2$s</string>
+    <string name="membership_billing">Billing history</string>
+    <string name="membership_freeze">Freeze membership</string>
+    <string name="membership_freeze_desc">Pause your days while travelling or sick.</string>
+    <string name="membership_freeze_action">Freeze</string>
+    <string name="membership_frozen_notice">Membership frozen · %1$d days remaining</string>
+    <string name="membership_referral">Refer a friend</string>
+    <string name="membership_referral_desc">Bring a friend and you both get free days.</string>
+    <string name="membership_referral_code">Your code</string>
+    <string name="membership_invite">Invite a friend</string>
+    <string name="membership_plans">Plans</string>
+    <string name="membership_friends">Friends</string>
+    <string name="membership_free_days">Free days</string>
+
+    <!-- Plans -->
+    <string name="plan_daily">Daily</string>
+    <string name="plan_weekly">Weekly</string>
+    <string name="plan_monthly">Monthly</string>
+    <string name="plan_quarterly">3 months</string>
+    <string name="plan_half_year">6 months</string>
+    <string name="plan_yearly">12 months</string>
+
+    <!-- Payment methods -->
+    <string name="pay_aba">ABA KHQR</string>
+    <string name="pay_acleda">ACLEDA</string>
+    <string name="pay_wing">Wing</string>
+    <string name="pay_cash">Cash</string>
+
+    <!-- Progress -->
+    <string name="progress_title">Progress</string>
+    <string name="progress_workout_log">Workout log</string>
+    <string name="progress_add_workout">Log workout</string>
+    <string name="progress_body">Body progress</string>
+    <string name="progress_weight">Weight</string>
+    <string name="progress_body_fat">Body fat</string>
+    <string name="progress_achievements">Achievements</string>
+    <string name="progress_sets_reps">%1$d sets × %2$d reps</string>
+    <string name="progress_unit_kg">%1$s kg</string>
+    <string name="progress_unit_pct">%1$s%%</string>
+    <string name="progress_range_7">Last 7 days</string>
+    <string name="progress_range_30">Last 30 days</string>
+    <string name="progress_range_90">Last 90 days</string>
+    <string name="progress_volume_trend">Volume lifted</string>
+    <string name="progress_recent_session">Recent session</string>
+    <string name="progress_prs">%1$d PRs</string>
+    <string name="progress_personal_records">Personal records</string>
+    <string name="progress_stat_volume">Volume</string>
+    <string name="progress_stat_sets">Sets</string>
+    <string name="progress_stat_kcal">Calories</string>
+    <string name="progress_unit_min">%1$d min</string>
+    <string name="progress_unit_kcal">%1$d kcal</string>
+    <string name="progress_pr_delta">+%1$s kg</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_account">Account</string>
+    <string name="profile_personal_info">Personal info</string>
+    <string name="profile_phone">Phone</string>
+    <string name="profile_member_since">Member since</string>
+    <string name="profile_pt_title">Personal trainer</string>
+    <string name="profile_pt_desc">Message your trainer directly.</string>
+    <string name="profile_message_telegram">Telegram</string>
+    <string name="profile_message_messenger">Messenger</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_theme">Theme</string>
+    <string name="profile_language">Language</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System</string>
+    <string name="profile_sign_out">Sign out</string>
+
+    <!-- Coming soon placeholders -->
+    <string name="coming_soon_title">Coming soon</string>
+    <string name="activity_coming_soon">Your friends\' workouts, kudos and branch leaderboards land here next.</string>
+    <string name="log_coming_soon">Template-based workout logging — pick a routine and track every set — lands here next.</string>
+</resources>
