@@ -1,10 +1,13 @@
 package com.gymapp.data.api
 
 import com.gymapp.data.model.Achievement
+import com.gymapp.data.model.ActivityFeedItem
+import com.gymapp.data.model.Announcement
 import com.gymapp.data.model.AuthSession
 import com.gymapp.data.model.BodyMetric
 import com.gymapp.data.model.BranchStatus
 import com.gymapp.data.model.CheckIn
+import com.gymapp.data.model.KudosRequest
 import com.gymapp.data.model.LoginRequest
 import com.gymapp.data.model.Member
 import com.gymapp.data.model.Membership
@@ -79,4 +82,13 @@ interface GymApi {
 
     @GET("achievements")
     suspend fun getAchievements(): List<Achievement>
+
+    @GET("activity/announcements")
+    suspend fun getAnnouncements(): List<Announcement>
+
+    @GET("activity/feed")
+    suspend fun getActivityFeed(): List<ActivityFeedItem>
+
+    @POST("activity/kudos")
+    suspend fun toggleKudos(@Body request: KudosRequest)
 }

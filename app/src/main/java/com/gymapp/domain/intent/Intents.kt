@@ -48,6 +48,12 @@ sealed interface LogIntent {
     data object LogAnother : LogIntent
 }
 
+sealed interface ActivityIntent {
+    data object Load : ActivityIntent
+    data object Retry : ActivityIntent
+    data class ToggleKudos(val itemId: String) : ActivityIntent
+}
+
 sealed interface ProfileIntent {
     data object Load : ProfileIntent
     data object Retry : ProfileIntent

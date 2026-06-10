@@ -48,8 +48,9 @@ locale API) collects the persisted theme + `WindowSizeClass`, then **gates on
 signed in, else `GymAppRoot`. The shell nav is **Home · Progress · [+ Log] · Activity · Profile** —
 a custom bottom bar with a raised lime center FAB (not Material `NavigationBar`); side rail on
 Expanded. Check-in & Membership are not tabs but detail routes (Home membership block → membership →
-check-in QR); the center [+ Log] is the detail-route **quick-log fast-path** (a real MVI screen);
-Activity is the last remaining `ComingSoon` stub.
+check-in QR); the center [+ Log] is the detail-route **quick-log fast-path** (a real MVI screen).
+**Activity** is the social feed (owner announcements + friends' workouts + kudos). `ComingSoon` is no
+longer used by any screen (kept as a generic component).
 
 **MVI, one pipeline per screen** (`ui/screens/<feature>/`): a `Screen` composable reads
 `StateFlow<UiState<T>>` from a `@HiltViewModel`, emits `*Intent`s via `onIntent`, and the
@@ -106,12 +107,20 @@ as pill fills. Flat: no gradients/shadows.
 
 ## Stubbed for later passes
 
-Login is mock (`FakeGymApi.signIn` accepts any non-blank ID + password). The **Activity feed** is
-still a `ComingSoon` placeholder wired into nav (Phase 2).
+Login is mock (`FakeGymApi.signIn` accepts any non-blank ID + password).
+
 The **Log** tab is the implemented quick-log fast-path (`ui/screens/log/`): pick a session-type chip
 (Gym · Cardio · Bodyweight) + duration → `logSession` ticks the streak once per run (stateful
 `FakeGymApi.getVisitStats`). It deliberately captures **no** set/volume data — the richer set-level
 logger (using `WorkoutLogEntry`) is a later progressive-disclosure pass, as is rerouting Progress's
 "recent session" to quick-logs (avoids `0 kg / 0 sets`).
+
+The **Activity** tab (`ui/screens/activity/`) is slice 1 of the social feed: owner `Announcement`s
+pinned above a friends' `ActivityFeedItem` feed with one-tap optimistic kudos. **No real-time
+presence** — async, friends-scoped, post-hoc; `FeedActor` is slim (no phone/memberCode), the feed
+exposes only type + duration + optional PR (no exact times/location). The model is built for the
+unbuilt slices: **slice 2** = `logSession` also prepends an `isYou=true` feed item (Log → feed);
+**slice 3** = set-level detail fills `FeedPr` → 🏆 milestone rows + self-initiated share cards.
+
 Camera QR *scanning* (Check-in only generates the member's QR), real freeze/referral actions,
 live KHQR payments, set-level workout/metric CRUD, and expiry push notifications are placeholders.

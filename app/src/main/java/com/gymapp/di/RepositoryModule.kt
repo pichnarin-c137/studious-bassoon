@@ -1,5 +1,7 @@
 package com.gymapp.di
 
+import com.gymapp.data.repository.ActivityRepository
+import com.gymapp.data.repository.ActivityRepositoryImpl
 import com.gymapp.data.repository.AuthRepository
 import com.gymapp.data.repository.AuthRepositoryImpl
 import com.gymapp.data.repository.CheckInRepository
@@ -39,4 +41,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindProgressRepository(impl: ProgressRepositoryImpl): ProgressRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindActivityRepository(impl: ActivityRepositoryImpl): ActivityRepository
 }

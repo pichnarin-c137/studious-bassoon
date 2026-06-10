@@ -159,9 +159,8 @@
     <string name="theme_system">តាមប្រព័ន្ធ</string>
     <string name="profile_sign_out">ចេញ</string>
 
-    <!-- Coming soon placeholders -->
+    <!-- Coming soon placeholder (still used by the ComingSoon component) -->
     <string name="coming_soon_title">នឹងមកដល់ឆាប់ៗ</string>
-    <string name="activity_coming_soon">ការហាត់របស់មិត្តភក្តិ ការលើកទឹកចិត្ត និងតារាងពិន្ទុសាខា នឹងបង្ហាញនៅទីនេះបន្ទាប់។</string>
 
     <!-- Log a session (quick-log fast-path) -->
     <string name="log_title">កត់ត្រាការហាត់</string>
@@ -178,4 +177,13 @@
     <string name="log_day_streak">ថ្ងៃជាប់គ្នា</string>
     <string name="log_logged_summary">បានកត់ត្រា · %1$s · %2$d នាទី</string>
     <string name="log_another">កត់ត្រាម្ដងទៀត</string>
+
+    <!-- Activity feed -->
+    <string name="activity_from_gym">ពីកន្លែងហាត់ប្រាណ</string>
+    <string name="activity_feed_section">សកម្មភាពថ្មីៗ</string>
+    <string name="activity_empty">មិនទាន់មានសកម្មភាពទេ។ កត់ត្រាការហាត់ដើម្បីចាប់ផ្ដើម។</string>
+    <string name="activity_you">អ្នក</string>
+    <string name="activity_kudos_cd">ផ្ដល់ការលើកទឹកចិត្ត</string>
+    <string name="activity_pr">ឯកត្តកម្ម · %1$s %2$s kg</string>
+    <string name="activity_feed_meta">%1$s · %2$d នាទី · %3$s</string>
 </resources>

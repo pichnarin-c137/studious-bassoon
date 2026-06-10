@@ -1,5 +1,7 @@
 package com.gymapp.domain.state
 
+import com.gymapp.data.model.ActivityFeedItem
+import com.gymapp.data.model.Announcement
 import com.gymapp.data.model.BranchStatus
 import com.gymapp.data.model.CheckIn
 import com.gymapp.data.model.Member
@@ -62,4 +64,10 @@ data class LogData(
     val lastSession: WorkoutSession?,
     val currentStreak: Int,
     val justLogged: Boolean,
+)
+
+/** Activity feed payload: owner announcements pinned above the friends' workout feed. */
+data class ActivityData(
+    val announcements: List<Announcement>,
+    val feed: List<ActivityFeedItem>,
 )

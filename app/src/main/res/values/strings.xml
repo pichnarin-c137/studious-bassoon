@@ -159,9 +159,8 @@
     <string name="theme_system">System</string>
     <string name="profile_sign_out">Sign out</string>
 
-    <!-- Coming soon placeholders -->
+    <!-- Coming soon placeholder (still used by the ComingSoon component) -->
     <string name="coming_soon_title">Coming soon</string>
-    <string name="activity_coming_soon">Your friends\' workouts, kudos and branch leaderboards land here next.</string>
 
     <!-- Log a session (quick-log fast-path) -->
     <string name="log_title">Log a session</string>
@@ -178,4 +177,13 @@
     <string name="log_day_streak">Day streak</string>
     <string name="log_logged_summary">Logged · %1$s · %2$d min</string>
     <string name="log_another">Log another</string>
+
+    <!-- Activity feed -->
+    <string name="activity_from_gym">From your gym</string>
+    <string name="activity_feed_section">Recent activity</string>
+    <string name="activity_empty">No activity yet. Log a workout to get the feed going.</string>
+    <string name="activity_you">You</string>
+    <string name="activity_kudos_cd">Give kudos</string>
+    <string name="activity_pr">PR · %1$s %2$s kg</string>
+    <string name="activity_feed_meta">%1$s · %2$d min · %3$s</string>
 </resources>

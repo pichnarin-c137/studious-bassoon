@@ -1,11 +1,15 @@
 package com.gymapp.data.api
 
 import com.gymapp.data.model.Achievement
+import com.gymapp.data.model.ActivityFeedItem
+import com.gymapp.data.model.Announcement
 import com.gymapp.data.model.BodyMetric
 import com.gymapp.data.model.BranchStatus
 import com.gymapp.data.model.BusyLevel
 import com.gymapp.data.model.CheckIn
 import com.gymapp.data.model.DaySession
+import com.gymapp.data.model.FeedActor
+import com.gymapp.data.model.FeedPr
 import com.gymapp.data.model.GymBusyness
 import com.gymapp.data.model.HourLoad
 import com.gymapp.data.model.Member
@@ -146,6 +150,28 @@ object MockData {
         Achievement("a_4", "Early bird", "10 check-ins before 7 AM.", unlocked = true),
         Achievement("a_5", "100 visits", "Reach 100 gym visits.", unlocked = false),
         Achievement("a_6", "Century lift", "Deadlift 100 kg for reps.", unlocked = false),
+    )
+
+    // Friends in the activity feed — slim actors (no phone/memberCode exposed across the social graph).
+    private val friendVibol = FeedActor("f_1", "Vibol Sok", null)
+    private val friendSreypov = FeedActor("f_2", "Sreypov Chea", null)
+    private val friendRithy = FeedActor("f_3", "Rithy Pen", null)
+    private val friendBopha = FeedActor("f_4", "Bopha Nan", null)
+
+    // Friends' workouts (most recent first). Type + duration + optional PR only — no exact times.
+    val activityFeed = listOf(
+        ActivityFeedItem("af_1", friendVibol, SessionType.GYM, 52, now - 2 * HOUR, pr = FeedPr("Bench press", 75.0), kudosCount = 12, youGaveKudos = false),
+        ActivityFeedItem("af_2", friendSreypov, SessionType.CARDIO, 35, now - 5 * HOUR, kudosCount = 4, youGaveKudos = true),
+        ActivityFeedItem("af_3", friendRithy, SessionType.BODYWEIGHT, 40, now - 1 * DAY, kudosCount = 7, youGaveKudos = false),
+        ActivityFeedItem("af_4", friendBopha, SessionType.GYM, 60, now - 1 * DAY - 3 * HOUR, kudosCount = 9, youGaveKudos = false),
+        ActivityFeedItem("af_5", friendVibol, SessionType.CARDIO, 28, now - 2 * DAY, kudosCount = 3, youGaveKudos = false),
+        ActivityFeedItem("af_6", friendSreypov, SessionType.GYM, 48, now - 3 * DAY, pr = FeedPr("Squat", 95.0), kudosCount = 15, youGaveKudos = true),
+    )
+
+    // Owner-authored notices pinned above the feed (most recent first).
+    val announcements = listOf(
+        Announcement("an_1", "Pchum Ben hours", "Shorter hours over the Pchum Ben holiday. We're back to the full schedule right after — train safe!", now - 6 * HOUR),
+        Announcement("an_2", "New class: Zumba", "Zumba every Tue & Thu at 6 PM — free for all members. Bring a friend.", now - 2 * DAY),
     )
 
     // Branch hours + live busy-ness. Open 06:00–22:00; load curve peaks in the evening. Computed
