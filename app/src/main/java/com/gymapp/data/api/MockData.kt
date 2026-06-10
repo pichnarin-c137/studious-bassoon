@@ -18,6 +18,7 @@ import com.gymapp.data.model.Plan
 import com.gymapp.data.model.PlanType
 import com.gymapp.data.model.PtContact
 import com.gymapp.data.model.Referral
+import com.gymapp.data.model.SessionType
 import com.gymapp.data.model.VisitStats
 import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WeeklyActivity
@@ -95,9 +96,9 @@ object MockData {
 
     // Strava-style session summaries (most recent first).
     val workoutSessions = listOf(
-        WorkoutSession("s_1", "Push day", now - 5 * HOUR, durationMin = 58, volumeKg = 4820.0, totalSets = 18, kcal = 420, prCount = 2),
-        WorkoutSession("s_2", "Pull day", now - 1 * DAY - 5 * HOUR, durationMin = 52, volumeKg = 5210.0, totalSets = 17, kcal = 395, prCount = 1),
-        WorkoutSession("s_3", "Legs", now - 3 * DAY - 4 * HOUR, durationMin = 64, volumeKg = 6740.0, totalSets = 20, kcal = 510, prCount = 0),
+        WorkoutSession("s_1", "Push day", now - 5 * HOUR, durationMin = 58, volumeKg = 4820.0, totalSets = 18, kcal = 420, prCount = 2, type = SessionType.GYM),
+        WorkoutSession("s_2", "Pull day", now - 1 * DAY - 5 * HOUR, durationMin = 52, volumeKg = 5210.0, totalSets = 17, kcal = 395, prCount = 1, type = SessionType.GYM),
+        WorkoutSession("s_3", "Legs", now - 3 * DAY - 4 * HOUR, durationMin = 64, volumeKg = 6740.0, totalSets = 20, kcal = 510, prCount = 0, type = SessionType.GYM),
     )
 
     val personalRecords = listOf(

@@ -8,6 +8,7 @@ import com.gymapp.data.model.Payment
 import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.Plan
 import com.gymapp.data.model.Referral
+import com.gymapp.data.model.SessionType
 import com.gymapp.data.model.TimeRange
 import com.gymapp.data.model.VisitStats
 import com.gymapp.data.model.VolumePoint
@@ -47,4 +48,18 @@ data class ProgressData(
 
 data class ProfileData(
     val member: Member,
+)
+
+/**
+ * Log fast-path state. The form selection (`selectedType`, `durationMin`) lives in state so Submit
+ * can read it and the screen stays a pure render of state. After a successful log, `justLogged`
+ * flips the screen to its confirmation and `currentStreak` carries the ticked-up streak.
+ */
+data class LogData(
+    val types: List<SessionType>,
+    val selectedType: SessionType?,
+    val durationMin: Int,
+    val lastSession: WorkoutSession?,
+    val currentStreak: Int,
+    val justLogged: Boolean,
 )

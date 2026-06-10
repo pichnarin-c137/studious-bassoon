@@ -48,7 +48,8 @@ locale API) collects the persisted theme + `WindowSizeClass`, then **gates on
 signed in, else `GymAppRoot`. The shell nav is **Home · Progress · [+ Log] · Activity · Profile** —
 a custom bottom bar with a raised lime center FAB (not Material `NavigationBar`); side rail on
 Expanded. Check-in & Membership are not tabs but detail routes (Home membership block → membership →
-check-in QR); Activity & Log are `ComingSoon` stubs.
+check-in QR); the center [+ Log] is the detail-route **quick-log fast-path** (a real MVI screen);
+Activity is the last remaining `ComingSoon` stub.
 
 **MVI, one pipeline per screen** (`ui/screens/<feature>/`): a `Screen` composable reads
 `StateFlow<UiState<T>>` from a `@HiltViewModel`, emits `*Intent`s via `onIntent`, and the
@@ -105,7 +106,12 @@ as pill fills. Flat: no gradients/shadows.
 
 ## Stubbed for later passes
 
-Login is mock (`FakeGymApi.signIn` accepts any non-blank ID + password). The **Activity feed** and
-**Log Workout** flow are `ComingSoon` placeholders wired into nav (Phase 2).
+Login is mock (`FakeGymApi.signIn` accepts any non-blank ID + password). The **Activity feed** is
+still a `ComingSoon` placeholder wired into nav (Phase 2).
+The **Log** tab is the implemented quick-log fast-path (`ui/screens/log/`): pick a session-type chip
+(Gym · Cardio · Bodyweight) + duration → `logSession` ticks the streak once per run (stateful
+`FakeGymApi.getVisitStats`). It deliberately captures **no** set/volume data — the richer set-level
+logger (using `WorkoutLogEntry`) is a later progressive-disclosure pass, as is rerouting Progress's
+"recent session" to quick-logs (avoids `0 kg / 0 sets`).
 Camera QR *scanning* (Check-in only generates the member's QR), real freeze/referral actions,
-live KHQR payments, workout/metric CRUD, and expiry push notifications are placeholders.
+live KHQR payments, set-level workout/metric CRUD, and expiry push notifications are placeholders.

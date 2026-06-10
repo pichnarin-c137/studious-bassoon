@@ -10,7 +10,15 @@ data class WorkoutSession(
     val totalSets: Int,
     val kcal: Int,
     val prCount: Int,
+    /** Set by the quick-log fast-path; null for legacy/seed sessions. Powers "repeat last session". */
+    val type: SessionType? = null,
 )
+
+/** The quick-log categories on the Log fast-path. Cambodian iron-gym focused: no class/combat. */
+enum class SessionType { GYM, CARDIO, BODYWEIGHT }
+
+/** Body of the quick-log request — a session type plus how long it ran. */
+data class LogSessionRequest(val type: SessionType, val durationMin: Int)
 
 /** A personal record for one exercise, with the improvement over the previous best (kg). */
 data class PersonalRecord(

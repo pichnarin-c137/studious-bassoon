@@ -1,5 +1,6 @@
 package com.gymapp.domain.intent
 
+import com.gymapp.data.model.SessionType
 import com.gymapp.data.model.TimeRange
 import com.gymapp.domain.model.AppLanguage
 import com.gymapp.domain.model.ThemeMode
@@ -34,6 +35,17 @@ sealed interface ProgressIntent {
     data object Load : ProgressIntent
     data object Retry : ProgressIntent
     data class SetRange(val range: TimeRange) : ProgressIntent
+}
+
+sealed interface LogIntent {
+    data object Load : LogIntent
+    data object Retry : LogIntent
+    data class SelectType(val type: SessionType) : LogIntent
+    data object IncrementDuration : LogIntent
+    data object DecrementDuration : LogIntent
+    data object RepeatLast : LogIntent
+    data object Submit : LogIntent
+    data object LogAnother : LogIntent
 }
 
 sealed interface ProfileIntent {

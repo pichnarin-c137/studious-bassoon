@@ -10,6 +10,7 @@ import com.gymapp.data.model.Member
 import com.gymapp.data.model.Membership
 import com.gymapp.data.model.Payment
 import com.gymapp.data.model.PersonalRecord
+import com.gymapp.data.model.LogSessionRequest
 import com.gymapp.data.model.Plan
 import com.gymapp.data.model.Referral
 import com.gymapp.data.model.VisitStats
@@ -31,6 +32,24 @@ class FakeGymApi @Inject constructor() : GymApi {
     }
 
     /**
+     * A quick-log in this run bumps the streak + visit counters once, so Home and the log
+     * confirmation reflect "you trained today" without a real backend behind them.
+     */
+    private var loggedToday = false
+
+    private fun currentVisitStats(): VisitStats =
+        if (loggedToday) {
+            MockData.visitStats.copy(
+                currentStreak = MockData.visitStats.currentStreak + 1,
+                totalVisits = MockData.visitStats.totalVisits + 1,
+                visitsThisMonth = MockData.visitStats.visitsThisMonth + 1,
+                lastVisit = System.currentTimeMillis(),
+            )
+        } else {
+            MockData.visitStats
+        }
+
+    /**
      * Owner-provisioned login: v1 accepts any non-blank member ID + password (the branch front
      * desk issues real credentials). A real backend verifies them and returns a signed token.
      */
@@ -47,10 +66,14 @@ class FakeGymApi @Inject constructor() : GymApi {
     override suspend fun getPayments(): List<Payment> = respond(MockData.payments)
     override suspend fun getReferral(): Referral = respond(MockData.referral)
     override suspend fun getCheckIns(): List<CheckIn> = respond(MockData.checkIns)
-    override suspend fun getVisitStats(): VisitStats = respond(MockData.visitStats)
+    override suspend fun getVisitStats(): VisitStats = respond(currentVisitStats())
     override suspend fun getWeeklyActivity(): WeeklyActivity = respond(MockData.weeklyActivity())
     override suspend fun getWorkoutLogs(): List<WorkoutLogEntry> = respond(MockData.workouts)
     override suspend fun getRecentSession(): WorkoutSession = respond(MockData.workoutSessions.first())
+    override suspend fun logSession(request: LogSessionRequest): VisitStats {
+        loggedToday = true
+        return respond(currentVisitStats())
+    }
     override suspend fun getPersonalRecords(): List<PersonalRecord> = respond(MockData.personalRecords)
     override suspend fun getVolumeTrend(days: Int): List<VolumePoint> =
         respond(MockData.volumeTrend.takeLast(days))

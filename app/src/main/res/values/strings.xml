@@ -162,5 +162,20 @@
     <!-- Coming soon placeholders -->
     <string name="coming_soon_title">Coming soon</string>
     <string name="activity_coming_soon">Your friends\' workouts, kudos and branch leaderboards land here next.</string>
-    <string name="log_coming_soon">Template-based workout logging — pick a routine and track every set — lands here next.</string>
+
+    <!-- Log a session (quick-log fast-path) -->
+    <string name="log_title">Log a session</string>
+    <string name="log_streak_line">Keep your %1$d-day streak alive</string>
+    <string name="log_question">What did you train?</string>
+    <string name="log_type_gym">Gym</string>
+    <string name="log_type_cardio">Cardio</string>
+    <string name="log_type_bodyweight">Bodyweight</string>
+    <string name="log_duration">Duration</string>
+    <string name="log_min_label">min</string>
+    <string name="log_session_summary">%1$s · %2$d min</string>
+    <string name="log_repeat_last">Repeat last session</string>
+    <string name="log_submit">Log workout</string>
+    <string name="log_day_streak">Day streak</string>
+    <string name="log_logged_summary">Logged · %1$s · %2$d min</string>
+    <string name="log_another">Log another</string>
 </resources>

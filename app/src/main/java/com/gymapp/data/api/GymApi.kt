@@ -10,6 +10,7 @@ import com.gymapp.data.model.Member
 import com.gymapp.data.model.Membership
 import com.gymapp.data.model.Payment
 import com.gymapp.data.model.PersonalRecord
+import com.gymapp.data.model.LogSessionRequest
 import com.gymapp.data.model.Plan
 import com.gymapp.data.model.Referral
 import com.gymapp.data.model.VisitStats
@@ -63,6 +64,9 @@ interface GymApi {
 
     @GET("progress/sessions/recent")
     suspend fun getRecentSession(): WorkoutSession
+
+    @POST("progress/sessions")
+    suspend fun logSession(@Body request: LogSessionRequest): VisitStats
 
     @GET("progress/records")
     suspend fun getPersonalRecords(): List<PersonalRecord>
