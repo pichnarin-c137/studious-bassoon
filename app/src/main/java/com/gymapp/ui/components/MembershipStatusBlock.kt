@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.gymapp.R
 import com.gymapp.data.model.MembershipStatus
 import com.gymapp.ui.theme.Spacing
+import com.gymapp.ui.theme.accentInk
 import com.gymapp.util.DateTimeUtil
 
 private const val NEAR_EXPIRY_DAYS = 5
@@ -48,7 +49,7 @@ fun MembershipStatusBlock(
     val accent = if (expired || nearExpiry) {
         MaterialTheme.colorScheme.tertiary
     } else {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.colorScheme.accentInk
     }
 
     val now = System.currentTimeMillis()

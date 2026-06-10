@@ -37,6 +37,7 @@ import com.gymapp.ui.components.UiStateContent
 import com.gymapp.ui.theme.Dimension
 import com.gymapp.ui.theme.MonoNumbers
 import com.gymapp.ui.theme.Spacing
+import com.gymapp.ui.theme.accentInk
 import com.gymapp.util.DateTimeUtil
 import com.gymapp.util.LocalWindowSize
 
@@ -75,7 +76,7 @@ private fun CheckInContent(data: CheckInData, onScan: () -> Unit) {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Box(
                 modifier = Modifier
-                    .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(20.dp))
+                    .border(2.dp, MaterialTheme.colorScheme.accentInk, RoundedCornerShape(20.dp))
                     .padding(Spacing.sm),
             ) {
                 QrCodeImage(content = data.qrPayload, size = Dimension.qrSize(window))

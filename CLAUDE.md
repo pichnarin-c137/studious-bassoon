@@ -74,6 +74,10 @@ binds it to `FakeGymApi` (in-memory `MockData` + simulated delay). Going live = 
 Dark near-black (`#101012`) canvas + a single electric-lime (`#D6FB3D`) accent used **only** for the
 next action (CTA), live/active status, the active tab, and positive progress — never decorative or
 as pill fills. Flat: no gradients/shadows.
+- **Accent ink vs fill**: anything thin or textual (chart lines/ticks, status dots, accent text &
+  icons, the active tab) must use `MaterialTheme.colorScheme.accentInk` (`ui/theme/Theme.kt`) —
+  lime on dark, olive `LimeInk` on light, because pure lime is ~1.1:1 against light surfaces.
+  `colorScheme.primary` (pure lime) is only for *fills* with dark content on top (CTA button, FAB).
 - **De-carded.** Screens use `Hairline` (1px rule) between sections, `OverlineLabel` (tiny tracked
   caps) captions, oversized monospaced numbers (`MonoNumbers` → `StatNumber`/`MetricBlock`), and
   `StatusDot` for status. Primitives live in `ui/components/Telemetry.kt`. `GymCard` still exists but
@@ -84,6 +88,8 @@ as pill fills. Flat: no gradients/shadows.
 - Charts are hand-drawn (`Canvas`/layout, no chart lib): `WeekBarChart`, `TrendLineChart`,
   `BusynessStrip` in `ui/components/Charts.kt`.
 - Two font weights only (400/500); the only ALL-CAPS is `OverlineLabel`.
+- Tracked-caps labels (`OverlineLabel`, `StatusDot`) drop their letter-spacing in the km locale —
+  tracking breaks Khmer subscript-consonant shaping (see `isKhmerUi()` in `CommonComponents.kt`).
 
 ## Conventions
 

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.gymapp.data.model.DaySession
 import com.gymapp.data.model.HourLoad
 import com.gymapp.ui.theme.Spacing
+import com.gymapp.ui.theme.accentInk
 import com.gymapp.util.DateTimeUtil
 
 /**
@@ -58,7 +59,7 @@ fun WeekBarChart(days: List<DaySession>, modifier: Modifier = Modifier) {
                                 .width(4.dp)
                                 .height(tickArea)
                                 .clip(RoundedCornerShape(50))
-                                .background(MaterialTheme.colorScheme.primary),
+                                .background(MaterialTheme.colorScheme.accentInk),
                         )
                     } else {
                         Box(Modifier.size(6.dp).clip(CircleShape).background(miss))
@@ -94,7 +95,7 @@ fun BusynessStrip(hourly: List<HourLoad>, modifier: Modifier = Modifier) {
                     .weight(1f)
                     .height((8 + 32 * frac).dp)
                     .clip(RoundedCornerShape(50))
-                    .background(if (h.current) MaterialTheme.colorScheme.primary else muted),
+                    .background(if (h.current) MaterialTheme.colorScheme.accentInk else muted),
             )
         }
     }
@@ -108,7 +109,7 @@ fun BusynessStrip(hourly: List<HourLoad>, modifier: Modifier = Modifier) {
 fun TrendLineChart(
     values: List<Double>,
     modifier: Modifier = Modifier,
-    lineColor: Color = MaterialTheme.colorScheme.primary,
+    lineColor: Color = MaterialTheme.colorScheme.accentInk,
 ) {
     Canvas(modifier.fillMaxWidth().height(140.dp)) {
         if (values.size < 2) return@Canvas

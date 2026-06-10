@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.platform.LocalConfiguration
 import com.gymapp.R
 import com.gymapp.data.model.MembershipStatus
 import com.gymapp.ui.theme.Dimension
@@ -104,15 +106,25 @@ fun SectionHeader(
     }
 }
 
+/**
+ * Khmer script has no case (so `.uppercase()` is a no-op) and letter-spacing breaks its
+ * subscript-consonant clusters, so the tracked-caps treatment must degrade gracefully: in the km
+ * locale labels drop the tracking and gain 1sp of size to stay distinguishable.
+ */
+@Composable
+@ReadOnlyComposable
+internal fun isKhmerUi(): Boolean = LocalConfiguration.current.locales.get(0)?.language == "km"
+
 /** Tiny letter-spaced caps label for section captions ("MEMBERSHIP", "THIS WEEK"). */
 @Composable
 fun OverlineLabel(text: String, modifier: Modifier = Modifier) {
+    val khmer = isKhmerUi()
     Text(
         text = text.uppercase(),
         modifier = modifier,
         style = MaterialTheme.typography.labelSmall,
-        fontSize = 11.sp,
-        letterSpacing = 1.sp,
+        fontSize = if (khmer) 12.sp else 11.sp,
+        letterSpacing = if (khmer) 0.sp else 1.sp,
         fontWeight = FontWeight.Medium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )

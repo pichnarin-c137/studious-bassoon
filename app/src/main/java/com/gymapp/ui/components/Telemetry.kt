@@ -25,6 +25,7 @@ import com.gymapp.R
 import com.gymapp.data.model.MembershipStatus
 import com.gymapp.ui.theme.MonoNumbers
 import com.gymapp.ui.theme.Spacing
+import com.gymapp.ui.theme.accentInk
 
 /**
  * Telemetry primitives: the building blocks of the data-led look — hairline rules instead of card
@@ -89,7 +90,7 @@ fun StatusDot(status: MembershipStatus, modifier: Modifier = Modifier) {
     when (status) {
         MembershipStatus.ACTIVE -> {
             labelRes = R.string.status_active
-            dot = MaterialTheme.colorScheme.primary
+            dot = MaterialTheme.colorScheme.accentInk
         }
         MembershipStatus.EXPIRING -> {
             labelRes = R.string.status_expiring
@@ -113,7 +114,7 @@ fun StatusDot(status: MembershipStatus, modifier: Modifier = Modifier) {
         Text(
             text = stringResource(labelRes).uppercase(),
             style = MaterialTheme.typography.labelMedium,
-            letterSpacing = 1.sp,
+            letterSpacing = if (isKhmerUi()) 0.sp else 1.sp,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Start,
         )

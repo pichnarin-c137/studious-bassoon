@@ -30,6 +30,7 @@ import com.gymapp.ui.components.StatusDot
 import com.gymapp.ui.components.UiStateContent
 import com.gymapp.ui.theme.MonoNumbers
 import com.gymapp.ui.theme.Spacing
+import com.gymapp.ui.theme.accentInk
 import com.gymapp.util.DateTimeUtil
 
 @Composable
@@ -129,7 +130,7 @@ private fun MembershipContent(data: MembershipData, onFreeze: () -> Unit, onShow
                     fontFamily = MonoNumbers,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.accentInk,
                 )
             }
             Row(

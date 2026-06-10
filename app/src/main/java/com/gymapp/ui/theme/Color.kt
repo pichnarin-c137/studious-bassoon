@@ -12,6 +12,13 @@ import androidx.compose.ui.graphics.Color
 val Lime = Color(0xFFD6FB3D)
 private val OnLime = Color(0xFF101012)
 
+/**
+ * Accent as *ink* (text, strokes, icons, chart lines) on light surfaces. Pure lime is 1.1:1
+ * against the light canvas — invisible — so ink usages go through [accentInk], which resolves to
+ * lime on dark and this olive (4.7:1 on white) on light. Fills (CTA button, FAB) keep pure lime.
+ */
+val LimeInk = Color(0xFF5F7A00)
+
 // Dark (primary) palette
 private val Canvas = Color(0xFF101012)      // background / surface
 private val Raised = Color(0xFF1A1A1E)      // cards & raised surfaces

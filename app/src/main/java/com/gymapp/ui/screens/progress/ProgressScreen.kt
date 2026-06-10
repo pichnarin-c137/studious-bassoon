@@ -42,6 +42,7 @@ import com.gymapp.ui.components.StatNumber
 import com.gymapp.ui.components.TrendLineChart
 import com.gymapp.ui.components.UiStateContent
 import com.gymapp.ui.theme.Spacing
+import com.gymapp.ui.theme.accentInk
 import com.gymapp.util.DateTimeUtil
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -137,7 +138,7 @@ private fun RangeToggle(label: String, selected: Boolean, onClick: () -> Unit) {
             text = label,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Medium,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (selected) MaterialTheme.colorScheme.accentInk else MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Box(
             Modifier
@@ -145,7 +146,7 @@ private fun RangeToggle(label: String, selected: Boolean, onClick: () -> Unit) {
                 .height(2.dp)
                 .width(if (selected) 18.dp else 0.dp)
                 .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.primary),
+                .background(MaterialTheme.colorScheme.accentInk),
         )
     }
 }
@@ -159,7 +160,7 @@ private fun DeltaBadge(deltaPct: Double) {
         text = stringResource(R.string.progress_unit_pct, signed),
         style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.Medium,
-        color = if (positive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+        color = if (positive) MaterialTheme.colorScheme.accentInk else MaterialTheme.colorScheme.error,
     )
 }
 
@@ -216,14 +217,14 @@ private fun PrInline(count: Int) {
         Icon(
             painter = painterResource(R.drawable.ic_trophy),
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = MaterialTheme.colorScheme.accentInk,
             modifier = Modifier.size(16.dp),
         )
         Text(
             text = stringResource(R.string.progress_prs, count),
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.accentInk,
         )
     }
 }
@@ -242,7 +243,7 @@ private fun PersonalRecordRow(record: PersonalRecord) {
                 text = "▲ " + stringResource(R.string.progress_pr_delta, oneDecimal(record.improvementKg)),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.accentInk,
             )
         }
     }

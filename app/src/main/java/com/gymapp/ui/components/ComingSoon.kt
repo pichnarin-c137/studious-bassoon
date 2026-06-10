@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.gymapp.R
 import com.gymapp.ui.theme.Spacing
+import com.gymapp.ui.theme.accentInk
 
 /** On-brand placeholder for features that land in a later pass (Activity feed, Log Workout). */
 @Composable
@@ -48,7 +49,7 @@ fun ComingSoon(
                 Icon(
                     painter = painterResource(iconRes),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.accentInk,
                     modifier = Modifier.size(32.dp),
                 )
             }

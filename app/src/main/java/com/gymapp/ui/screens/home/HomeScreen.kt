@@ -54,6 +54,7 @@ import com.gymapp.ui.components.WeekBarChart
 import com.gymapp.ui.screens.membership.labelRes
 import com.gymapp.ui.theme.MonoNumbers
 import com.gymapp.ui.theme.Spacing
+import com.gymapp.ui.theme.accentInk
 import com.gymapp.util.DateTimeUtil
 
 private fun pad2(n: Int): String = if (n in 0..9) "0$n" else n.toString()
@@ -218,7 +219,7 @@ private fun EntryQrRow(memberCode: String, onClick: () -> Unit) {
         Icon(
             painter = painterResource(R.drawable.ic_qr),
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = MaterialTheme.colorScheme.accentInk,
             modifier = Modifier.size(36.dp),
         )
     }
@@ -238,7 +239,7 @@ private fun AtTheGym(branch: BranchStatus) {
             }
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                    Dot(if (branch.openNow) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                    Dot(if (branch.openNow) MaterialTheme.colorScheme.accentInk else MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(
                         text = stringResource(if (branch.openNow) R.string.branch_open else R.string.branch_closed),
                         style = MaterialTheme.typography.labelMedium,
@@ -309,7 +310,7 @@ private fun Dot(color: Color) {
 
 @Composable
 private fun busyColor(level: BusyLevel): Color = when (level) {
-    BusyLevel.QUIET -> MaterialTheme.colorScheme.primary
+    BusyLevel.QUIET -> MaterialTheme.colorScheme.accentInk
     BusyLevel.MODERATE -> MaterialTheme.colorScheme.tertiary
     BusyLevel.BUSY -> MaterialTheme.colorScheme.error
 }

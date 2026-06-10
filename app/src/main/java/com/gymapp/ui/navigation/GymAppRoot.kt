@@ -32,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,11 +41,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.gymapp.R
 import com.gymapp.ui.theme.Spacing
+import com.gymapp.ui.theme.accentInk
 import com.gymapp.util.LocalWindowSize
 import com.gymapp.util.WindowSize
-
-/** Inactive tab tint (spec): gray icons, lime only on the active tab. */
-private val InactiveTint = Color(0xFF5A5A60)
 
 /**
  * Responsive app shell. Compact/Medium use a custom bottom bar with a raised lime center "+" for
@@ -140,7 +137,12 @@ private fun BarItem(
     onSelect: (Destination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val color = if (current == dest) MaterialTheme.colorScheme.primary else InactiveTint
+    // Gray icons, lime only on the active tab; onSurfaceVariant keeps the 11sp labels readable.
+    val color = if (current == dest) {
+        MaterialTheme.colorScheme.accentInk
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Column(
         modifier = modifier.clickable { onSelect(dest) },
         horizontalAlignment = Alignment.CenterHorizontally,
