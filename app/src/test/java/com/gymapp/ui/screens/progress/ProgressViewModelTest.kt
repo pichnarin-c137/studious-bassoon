@@ -2,6 +2,7 @@ package com.gymapp.ui.screens.progress
 
 import com.gymapp.data.model.Achievement
 import com.gymapp.data.model.BodyMetric
+import com.gymapp.data.model.LoggedExercise
 import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.SessionType
 import com.gymapp.data.model.StreakState
@@ -126,4 +127,11 @@ private class FakeProgressRepository(
     override suspend fun setWeeklyTarget(target: Int): StreakState = streak.copy(weeklyTarget = target)
     override suspend fun logSession(type: SessionType, durationMin: Int): StreakState =
         streak.copy(sessionsThisWeek = streak.sessionsThisWeek + 1)
+
+    override suspend fun logDetailedSession(
+        type: SessionType,
+        durationMin: Int,
+        exercises: List<LoggedExercise>,
+        note: String?,
+    ): StreakState = streak.copy(sessionsThisWeek = streak.sessionsThisWeek + 1)
 }

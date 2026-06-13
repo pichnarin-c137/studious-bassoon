@@ -7,6 +7,7 @@ import com.gymapp.data.model.AuthSession
 import com.gymapp.data.model.BodyMetric
 import com.gymapp.data.model.BranchStatus
 import com.gymapp.data.model.CheckIn
+import com.gymapp.data.model.DetailedLogRequest
 import com.gymapp.data.model.KudosRequest
 import com.gymapp.data.model.LoginRequest
 import com.gymapp.data.model.Member
@@ -79,6 +80,9 @@ interface GymApi {
 
     @POST("progress/sessions")
     suspend fun logSession(@Body request: LogSessionRequest): StreakState
+
+    @POST("progress/sessions/detailed")
+    suspend fun logDetailedSession(@Body request: DetailedLogRequest): StreakState
 
     @GET("progress/records")
     suspend fun getPersonalRecords(): List<PersonalRecord>

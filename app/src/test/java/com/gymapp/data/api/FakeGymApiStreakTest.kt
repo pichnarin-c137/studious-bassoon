@@ -1,7 +1,9 @@
 package com.gymapp.data.api
 
+import com.gymapp.data.local.WorkoutStore
 import com.gymapp.data.model.LogSessionRequest
 import com.gymapp.data.model.SessionType
+import com.gymapp.data.model.StoredSession
 import com.gymapp.data.model.WeeklyTargetRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -19,7 +21,7 @@ class FakeGymApiStreakTest {
 
     @Test
     fun `crossing the weekly target bumps the week streak exactly once`() = runTest {
-        val api = FakeGymApi()
+        val api = FakeGymApi(InMemoryWorkoutStore())
         val start = api.getStreakState()
         val toCross = start.weeklyTarget - start.sessionsThisWeek
         assertTrue("seed should start below the weekly target", toCross >= 1)
@@ -37,7 +39,7 @@ class FakeGymApiStreakTest {
 
     @Test
     fun `a rest day never reduces the week streak`() = runTest {
-        val api = FakeGymApi()
+        val api = FakeGymApi(InMemoryWorkoutStore())
         val first = api.getStreakState()
         val second = api.getStreakState() // no session logged in between
         assertEquals(first.weekStreak, second.weekStreak)
@@ -46,10 +48,18 @@ class FakeGymApiStreakTest {
 
     @Test
     fun `setting the weekly target changes the goal without touching the streak`() = runTest {
-        val api = FakeGymApi()
+        val api = FakeGymApi(InMemoryWorkoutStore())
         val before = api.getStreakState()
         val after = api.setWeeklyTarget(WeeklyTargetRequest(before.weeklyTarget + 1))
         assertEquals(before.weeklyTarget + 1, after.weeklyTarget)
         assertEquals(before.weekStreak, after.weekStreak)
     }
+}
+
+/** In-memory [WorkoutStore] double so the fake API can be exercised without Android DataStore. */
+private class InMemoryWorkoutStore : WorkoutStore {
+    private val items = mutableListOf<StoredSession>()
+    override suspend fun all(): List<StoredSession> = items.toList()
+    override suspend fun append(session: StoredSession) { items.add(0, session) }
+    override suspend fun mostRecent(): StoredSession? = items.firstOrNull()
 }

@@ -12,6 +12,7 @@ import com.gymapp.ui.screens.log.LogWorkoutScreen
 import com.gymapp.ui.screens.membership.MembershipScreen
 import com.gymapp.ui.screens.profile.ProfileScreen
 import com.gymapp.ui.screens.progress.ProgressScreen
+import com.gymapp.ui.screens.session.SessionScreen
 
 @Composable
 fun GymNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -32,7 +33,10 @@ fun GymNavHost(navController: NavHostController, modifier: Modifier = Modifier) 
         composable(Destination.PROFILE.route) { ProfileScreen() }
 
         // Center action + detail screens (bottom bar hidden, back arrow shown).
-        composable(Routes.LOG) { LogWorkoutScreen() }
+        composable(Routes.LOG) {
+            LogWorkoutScreen(onStartSession = { navController.navigate(Routes.SESSION) })
+        }
+        composable(Routes.SESSION) { SessionScreen(onExit = { navController.popBackStack() }) }
         composable(Routes.MEMBERSHIP) {
             MembershipScreen(onShowQr = { navController.navigate(Routes.CHECKIN) })
         }

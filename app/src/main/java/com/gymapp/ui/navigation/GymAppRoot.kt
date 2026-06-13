@@ -101,6 +101,7 @@ private fun detailTitleRes(route: String?): Int = when (route) {
     Routes.MEMBERSHIP -> R.string.nav_membership
     Routes.CHECKIN -> R.string.checkin_title
     Routes.LOG -> R.string.nav_log
+    Routes.SESSION -> R.string.session_title
     else -> R.string.app_name
 }
 

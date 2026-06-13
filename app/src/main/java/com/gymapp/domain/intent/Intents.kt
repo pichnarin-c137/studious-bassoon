@@ -50,6 +50,17 @@ sealed interface LogIntent {
     data object LogAnother : LogIntent
 }
 
+sealed interface SessionIntent {
+    /** UI-driven 1-second clock pulse (advances elapsed + decrements any rest countdown). */
+    data object Tick : SessionIntent
+    data class SetType(val type: SessionType) : SessionIntent
+    data class AddSet(val exercise: String, val reps: Int, val weightKg: Double?) : SessionIntent
+    data object RemoveLastSet : SessionIntent
+    data class StartRest(val seconds: Int) : SessionIntent
+    data object StopRest : SessionIntent
+    data class Finish(val note: String) : SessionIntent
+}
+
 sealed interface ActivityIntent {
     data object Load : ActivityIntent
     data object Retry : ActivityIntent

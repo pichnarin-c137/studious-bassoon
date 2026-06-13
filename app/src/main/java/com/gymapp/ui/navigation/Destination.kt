@@ -25,9 +25,10 @@ enum class Destination(
 /** Non-tab routes: the center Log action and the detail screens reached from Home. */
 object Routes {
     const val LOG = "log"
+    const val SESSION = "session"
     const val MEMBERSHIP = "membership"
     const val CHECKIN = "checkin"
 
     /** Detail/overlay routes hide the bottom bar and show a back arrow instead. */
-    val detailRoutes = setOf(LOG, MEMBERSHIP, CHECKIN)
+    val detailRoutes = setOf(LOG, SESSION, MEMBERSHIP, CHECKIN)
 }

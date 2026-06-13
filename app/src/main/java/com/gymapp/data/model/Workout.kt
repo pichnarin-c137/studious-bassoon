@@ -1,5 +1,7 @@
 package com.gymapp.data.model
 
+import kotlinx.serialization.Serializable
+
 /** A completed training session — the Strava-style summary shown on Progress (and later Activity). */
 data class WorkoutSession(
     val id: String,
@@ -15,6 +17,7 @@ data class WorkoutSession(
 )
 
 /** The quick-log categories on the Log fast-path. Cambodian iron-gym focused: no class/combat. */
+@Serializable
 enum class SessionType { GYM, CARDIO, BODYWEIGHT }
 
 /** Body of the quick-log request — a session type plus how long it ran. */

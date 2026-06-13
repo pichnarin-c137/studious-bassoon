@@ -3,6 +3,8 @@ package com.gymapp.data.repository
 import com.gymapp.data.api.GymApi
 import com.gymapp.data.model.Achievement
 import com.gymapp.data.model.BodyMetric
+import com.gymapp.data.model.DetailedLogRequest
+import com.gymapp.data.model.LoggedExercise
 import com.gymapp.data.model.LogSessionRequest
 import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.SessionType
@@ -37,6 +39,14 @@ interface ProgressRepository {
 
     /** Quick-logs a session; returns the updated streak state (the weekly goal moves forward). */
     suspend fun logSession(type: SessionType, durationMin: Int): StreakState
+
+    /** Logs a detailed live session (per-set work + note); returns the updated streak state. */
+    suspend fun logDetailedSession(
+        type: SessionType,
+        durationMin: Int,
+        exercises: List<LoggedExercise>,
+        note: String?,
+    ): StreakState
 }
 
 class ProgressRepositoryImpl @Inject constructor(
@@ -55,4 +65,11 @@ class ProgressRepositoryImpl @Inject constructor(
         api.setWeeklyTarget(WeeklyTargetRequest(target))
     override suspend fun logSession(type: SessionType, durationMin: Int): StreakState =
         api.logSession(LogSessionRequest(type, durationMin))
+
+    override suspend fun logDetailedSession(
+        type: SessionType,
+        durationMin: Int,
+        exercises: List<LoggedExercise>,
+        note: String?,
+    ): StreakState = api.logDetailedSession(DetailedLogRequest(type, durationMin, exercises, note))
 }

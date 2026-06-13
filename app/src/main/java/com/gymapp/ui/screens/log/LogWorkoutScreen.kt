@@ -50,20 +50,20 @@ import com.gymapp.ui.theme.accentInk
 private val DURATION_PRESETS = listOf(30, 45, 60, 90)
 
 @Composable
-fun LogWorkoutScreen(viewModel: LogViewModel = hiltViewModel()) {
+fun LogWorkoutScreen(onStartSession: () -> Unit = {}, viewModel: LogViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     UiStateContent(state, onRetry = { viewModel.onIntent(LogIntent.Retry) }) { data ->
         if (data.justLogged) {
             LogConfirmation(data, onIntent = viewModel::onIntent)
         } else {
-            LogForm(data, onIntent = viewModel::onIntent)
+            LogForm(data, onIntent = viewModel::onIntent, onStartSession = onStartSession)
         }
     }
 }
 
 /** The sub-10-second daily log: pick a type, nudge the duration, tap Log. */
 @Composable
-private fun LogForm(data: LogData, onIntent: (LogIntent) -> Unit) {
+private fun LogForm(data: LogData, onIntent: (LogIntent) -> Unit, onStartSession: () -> Unit) {
     ScreenContainer {
         // Header: the motivating week-progress is given weight — lime pips, not muted text.
         Row(
@@ -145,6 +145,11 @@ private fun LogForm(data: LogData, onIntent: (LogIntent) -> Unit) {
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(stringResource(R.string.log_submit))
+        }
+
+        // Opt-in fast-path → live session (timer + per-set detail); the quick log stays the default.
+        OutlinedButton(onClick = onStartSession, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.log_start_session))
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.gymapp.data.api
 
+import com.gymapp.data.local.WorkoutStore
 import com.gymapp.data.model.Achievement
 import com.gymapp.data.model.ActivityFeedItem
 import com.gymapp.data.model.Announcement
@@ -7,6 +8,7 @@ import com.gymapp.data.model.AuthSession
 import com.gymapp.data.model.BodyMetric
 import com.gymapp.data.model.BranchStatus
 import com.gymapp.data.model.CheckIn
+import com.gymapp.data.model.DetailedLogRequest
 import com.gymapp.data.model.KudosRequest
 import com.gymapp.data.model.LoginRequest
 import com.gymapp.data.model.Member
@@ -16,6 +18,7 @@ import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.LogSessionRequest
 import com.gymapp.data.model.Plan
 import com.gymapp.data.model.Referral
+import com.gymapp.data.model.StoredSession
 import com.gymapp.data.model.StreakState
 import com.gymapp.data.model.TrainingDay
 import com.gymapp.data.model.VisitStats
@@ -24,13 +27,16 @@ import com.gymapp.data.model.WeeklyTargetRequest
 import com.gymapp.data.model.WeeklyActivity
 import com.gymapp.data.model.WorkoutLogEntry
 import com.gymapp.data.model.WorkoutSession
+import com.gymapp.data.model.toWorkoutSession
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /** In-memory [GymApi] with a small simulated network delay so loading states are exercised. */
 @Singleton
-class FakeGymApi @Inject constructor() : GymApi {
+class FakeGymApi @Inject constructor(
+    private val store: WorkoutStore,
+) : GymApi {
 
     private suspend fun <T> respond(value: T): T {
         delay(NETWORK_DELAY_MS)
@@ -90,20 +96,52 @@ class FakeGymApi @Inject constructor() : GymApi {
         return respond(currentStreakState())
     }
     override suspend fun getWorkoutLogs(): List<WorkoutLogEntry> = respond(MockData.workouts)
-    override suspend fun getRecentSession(): WorkoutSession = respond(MockData.workoutSessions.first())
+    override suspend fun getRecentSession(): WorkoutSession =
+        respond(store.mostRecent()?.toWorkoutSession() ?: MockData.workoutSessions.first())
+
     override suspend fun logSession(request: LogSessionRequest): StreakState {
+        registerLoggedSession()
+        store.append(
+            StoredSession(
+                id = "log_${System.currentTimeMillis()}",
+                type = request.type,
+                durationMin = request.durationMin,
+                performedAt = System.currentTimeMillis(),
+            ),
+        )
+        return respond(currentStreakState())
+    }
+
+    override suspend fun logDetailedSession(request: DetailedLogRequest): StreakState {
+        registerLoggedSession()
+        store.append(
+            StoredSession(
+                id = "sess_${System.currentTimeMillis()}",
+                type = request.type,
+                durationMin = request.durationMin,
+                performedAt = System.currentTimeMillis(),
+                exercises = request.exercises,
+                note = request.note,
+            ),
+        )
+        return respond(currentStreakState())
+    }
+
+    /**
+     * Moves the in-run weekly streak forward for one logged session. Crossing the weekly target
+     * secures the week: bump the streak once and bank a freeze every fourth secured week (capped);
+     * logging more sessions the same week doesn't re-bump.
+     */
+    private fun registerLoggedSession() {
         val before = MockData.streakState().sessionsThisWeek + sessionsLoggedThisRun
         sessionsLoggedThisRun++
         val after = before + 1
-        // Crossing the weekly target secures this week: bump the streak once and bank a freeze
-        // every fourth secured week (capped). Logging more sessions the same week doesn't re-bump.
         if (before < weeklyTarget && after >= weeklyTarget) {
             weekStreak++
             if (weekStreak % FREEZE_EARN_EVERY == 0 && freezesAvailable < FREEZE_CAP) {
                 freezesAvailable++
             }
         }
-        return respond(currentStreakState())
     }
     override suspend fun getPersonalRecords(): List<PersonalRecord> = respond(MockData.personalRecords)
     override suspend fun getVolumeTrend(days: Int): List<VolumePoint> =

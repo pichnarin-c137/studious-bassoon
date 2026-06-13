@@ -187,6 +187,28 @@
     <string name="log_week_streak">សប្ដាហ៍ជាប់គ្នា</string>
     <string name="log_logged_summary">បានកត់ត្រា · %1$s · %2$d នាទី</string>
     <string name="log_another">កត់ត្រាម្ដងទៀត</string>
+    <string name="log_start_session">ចាប់ផ្ដើមវគ្គផ្ទាល់</string>
+
+    <!-- Live session -->
+    <string name="session_title">វគ្គផ្ទាល់</string>
+    <string name="session_elapsed">បានកន្លង</string>
+    <string name="session_live">ផ្ទាល់</string>
+    <string name="session_type">ប្រភេទវគ្គ</string>
+    <string name="session_exercises">លំហាត់</string>
+    <string name="session_no_sets">បន្ថែមសិតដំបូងដើម្បីចាប់ផ្ដើមតាមដាន</string>
+    <string name="session_exercise_hint">លំហាត់</string>
+    <string name="session_reps_hint">ចំនួនលើក</string>
+    <string name="session_weight_hint">គីឡូ</string>
+    <string name="session_add_set">បន្ថែម</string>
+    <string name="session_rest">សម្រាក</string>
+    <string name="session_rest_seconds">%1$dវិ</string>
+    <string name="session_rest_stop">បញ្ឈប់</string>
+    <string name="session_note">កំណត់ចំណាំ</string>
+    <string name="session_note_hint">ទៅជាយ៉ាងណាដែរ?</string>
+    <string name="session_finish">បញ្ចប់វគ្គ</string>
+    <string name="session_done">រួចរាល់</string>
+    <string name="session_set_weighted">%1$s គីឡូ × %2$d</string>
+    <string name="session_set_reps">× %1$d</string>
 
     <!-- Activity feed -->
     <string name="activity_from_gym">ពីកន្លែងហាត់ប្រាណ</string>
