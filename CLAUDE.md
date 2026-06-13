@@ -110,10 +110,33 @@ as pill fills. Flat: no gradients/shadows.
 Login is mock (`FakeGymApi.signIn` accepts any non-blank ID + password).
 
 The **Log** tab is the implemented quick-log fast-path (`ui/screens/log/`): pick a session-type chip
-(Gym · Cardio · Bodyweight) + duration → `logSession` ticks the streak once per run (stateful
-`FakeGymApi.getVisitStats`). It deliberately captures **no** set/volume data — the richer set-level
-logger (using `WorkoutLogEntry`) is a later progressive-disclosure pass, as is rerouting Progress's
-"recent session" to quick-logs (avoids `0 kg / 0 sets`).
+(Gym · Cardio · Bodyweight) + duration → `logSession` moves the **weekly** streak forward (stateful
+`FakeGymApi`, returns `StreakState`). It deliberately captures **no** set/volume data — the richer
+set-level logger (using `WorkoutLogEntry`) is a later progressive-disclosure pass.
+
+The **streak is weekly and kind** (`StreakState` — not the old daily `VisitStats.currentStreak`, which
+was removed): a member sets a `weeklyTarget` (3–6, default `MockData.WEEKLY_TARGET_DEFAULT` = 5, shared
+with `weeklyActivity.sessionsTarget` so Home's week bars and the goal agree), and `weekStreak` counts
+consecutive weeks the target was hit — **a rest day never breaks it**. Earned `freezesAvailable`
+protect a missed week (the missed-week *consume* is a backend stub; the in-memory app has no week
+rollover). `getStreakState`/`setWeeklyTarget` live on `CheckInRepository`/`ProgressRepository`; the
+inline goal setter is on Progress, and the lime Home "This week" nudge ("N to your weekly goal" /
+"Weekly goal met") is the rest-day reason-to-open. In the mock, `FakeGymApi` derives `sessionsThisWeek`
+from the same Mon→Sun pattern as `weeklyActivity`, bumps `weekStreak` once when a log crosses the
+target, and banks a freeze every 4th secured week (capped).
+
+The **Progress** tab (`ui/screens/progress/`) is a **daily consistency dashboard**, not volume
+analytics — it's built on the honest facts the quick-log captures (showing up + duration + type) plus
+the kind streak, so it moves with real activity instead of fabricated volume. Layout (de-carded):
+week-streak hero (weekly goal line + freeze badge + inline target setter) + per-day `ConsistencyStrip`
+(lime tick per trained day, height ∝ duration; `ui/components/Charts.kt`) over the 7/30/90 window →
+time-invested metrics (Sessions · Hours · Avg) → neutral `TypeMixBar` (Gym/Cardio/Bodyweight; off the
+lime budget) → honest last-session row (type · duration · when, no `0 kg / 0 sets`) → a **Strength
+stub** that lights up when set-level logging lands. The per-day strip reads seeded `MockData.trainingDays`
+via `getTrainingDays` (**not** wired to `logSession`; that wire-in, plus real volume/PRs, is deferred —
+seeded `volumeTrend`/`personalRecords` + repo methods are kept for it), but the week-streak hero reads
+`getStreakState`, which `logSession` does move within a run. Home owns the week-streak metric, the
+weekly-goal nudge & current-week `WeekBarChart`; Progress is the longitudinal view and doesn't repeat it.
 
 The **Activity** tab (`ui/screens/activity/`) is slice 1 of the social feed: owner `Announcement`s
 pinned above a friends' `ActivityFeedItem` feed with one-tap optimistic kudos. **No real-time

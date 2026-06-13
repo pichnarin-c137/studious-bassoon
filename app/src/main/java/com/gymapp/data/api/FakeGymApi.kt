@@ -16,8 +16,11 @@ import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.LogSessionRequest
 import com.gymapp.data.model.Plan
 import com.gymapp.data.model.Referral
+import com.gymapp.data.model.StreakState
+import com.gymapp.data.model.TrainingDay
 import com.gymapp.data.model.VisitStats
 import com.gymapp.data.model.VolumePoint
+import com.gymapp.data.model.WeeklyTargetRequest
 import com.gymapp.data.model.WeeklyActivity
 import com.gymapp.data.model.WorkoutLogEntry
 import com.gymapp.data.model.WorkoutSession
@@ -35,22 +38,32 @@ class FakeGymApi @Inject constructor() : GymApi {
     }
 
     /**
-     * A quick-log in this run bumps the streak + visit counters once, so Home and the log
-     * confirmation reflect "you trained today" without a real backend behind them.
+     * Quick-logs in this run move the weekly streak + visit counters forward, so Home, Progress and
+     * the log confirmation reflect "you trained" without a real backend behind them. State is
+     * per-run (resets when the process dies); a real backend persists it across weeks.
      */
-    private var loggedToday = false
+    private var sessionsLoggedThisRun = 0
+    private var weeklyTarget = MockData.streakState().weeklyTarget
+    private var weekStreak = MockData.streakState().weekStreak
+    private var freezesAvailable = MockData.streakState().freezesAvailable
 
     private fun currentVisitStats(): VisitStats =
-        if (loggedToday) {
+        if (sessionsLoggedThisRun > 0) {
             MockData.visitStats.copy(
-                currentStreak = MockData.visitStats.currentStreak + 1,
-                totalVisits = MockData.visitStats.totalVisits + 1,
-                visitsThisMonth = MockData.visitStats.visitsThisMonth + 1,
+                totalVisits = MockData.visitStats.totalVisits + sessionsLoggedThisRun,
+                visitsThisMonth = MockData.visitStats.visitsThisMonth + sessionsLoggedThisRun,
                 lastVisit = System.currentTimeMillis(),
             )
         } else {
             MockData.visitStats
         }
+
+    private fun currentStreakState(): StreakState = StreakState(
+        weeklyTarget = weeklyTarget,
+        sessionsThisWeek = MockData.streakState().sessionsThisWeek + sessionsLoggedThisRun,
+        weekStreak = weekStreak,
+        freezesAvailable = freezesAvailable,
+    )
 
     /**
      * Owner-provisioned login: v1 accepts any non-blank member ID + password (the branch front
@@ -71,15 +84,32 @@ class FakeGymApi @Inject constructor() : GymApi {
     override suspend fun getCheckIns(): List<CheckIn> = respond(MockData.checkIns)
     override suspend fun getVisitStats(): VisitStats = respond(currentVisitStats())
     override suspend fun getWeeklyActivity(): WeeklyActivity = respond(MockData.weeklyActivity())
+    override suspend fun getStreakState(): StreakState = respond(currentStreakState())
+    override suspend fun setWeeklyTarget(request: WeeklyTargetRequest): StreakState {
+        weeklyTarget = request.target.coerceIn(WEEKLY_TARGET_MIN, WEEKLY_TARGET_MAX)
+        return respond(currentStreakState())
+    }
     override suspend fun getWorkoutLogs(): List<WorkoutLogEntry> = respond(MockData.workouts)
     override suspend fun getRecentSession(): WorkoutSession = respond(MockData.workoutSessions.first())
-    override suspend fun logSession(request: LogSessionRequest): VisitStats {
-        loggedToday = true
-        return respond(currentVisitStats())
+    override suspend fun logSession(request: LogSessionRequest): StreakState {
+        val before = MockData.streakState().sessionsThisWeek + sessionsLoggedThisRun
+        sessionsLoggedThisRun++
+        val after = before + 1
+        // Crossing the weekly target secures this week: bump the streak once and bank a freeze
+        // every fourth secured week (capped). Logging more sessions the same week doesn't re-bump.
+        if (before < weeklyTarget && after >= weeklyTarget) {
+            weekStreak++
+            if (weekStreak % FREEZE_EARN_EVERY == 0 && freezesAvailable < FREEZE_CAP) {
+                freezesAvailable++
+            }
+        }
+        return respond(currentStreakState())
     }
     override suspend fun getPersonalRecords(): List<PersonalRecord> = respond(MockData.personalRecords)
     override suspend fun getVolumeTrend(days: Int): List<VolumePoint> =
         respond(MockData.volumeTrend.takeLast(days))
+    override suspend fun getTrainingDays(days: Int): List<TrainingDay> =
+        respond(MockData.trainingDays.takeLast(days))
     override suspend fun getBodyMetrics(): List<BodyMetric> = respond(MockData.bodyMetrics)
     override suspend fun getAchievements(): List<Achievement> = respond(MockData.achievements)
     override suspend fun getAnnouncements(): List<Announcement> = respond(MockData.announcements)
@@ -91,5 +121,9 @@ class FakeGymApi @Inject constructor() : GymApi {
 
     private companion object {
         const val NETWORK_DELAY_MS = 500L
+        const val FREEZE_EARN_EVERY = 4   // bank a freeze every 4th secured week
+        const val FREEZE_CAP = 2          // never hold more than this many
+        const val WEEKLY_TARGET_MIN = 3
+        const val WEEKLY_TARGET_MAX = 6
     }
 }

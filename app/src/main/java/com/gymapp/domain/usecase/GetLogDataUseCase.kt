@@ -18,7 +18,8 @@ object LogDefaults {
 
 /**
  * Seeds the Log fast-path: the selectable session types, a default duration, the most recent
- * session (so "repeat last" can prefill it), and the current streak (shown growing after a log).
+ * session (so "repeat last" can prefill it), and the kind streak (weekly goal, shown moving
+ * forward after a log).
  */
 class GetLogDataUseCase @Inject constructor(
     private val progressRepository: ProgressRepository,
@@ -26,13 +27,13 @@ class GetLogDataUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(): LogData = coroutineScope {
         val lastSession = async { progressRepository.getRecentSession() }
-        val stats = async { checkInRepository.getVisitStats() }
+        val streak = async { checkInRepository.getStreakState() }
         LogData(
             types = SessionType.entries,
             selectedType = null,
             durationMin = LogDefaults.DURATION_DEFAULT,
             lastSession = lastSession.await(),
-            currentStreak = stats.await().currentStreak,
+            streak = streak.await(),
             justLogged = false,
         )
     }

@@ -5,6 +5,8 @@ import com.gymapp.data.model.BodyMetric
 import com.gymapp.data.model.CheckIn
 import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.SessionType
+import com.gymapp.data.model.StreakState
+import com.gymapp.data.model.TrainingDay
 import com.gymapp.data.model.VisitStats
 import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WeeklyActivity
@@ -43,9 +45,9 @@ class LogViewModelTest {
         volumeKg = 1000.0, totalSets = 10, kcal = 300, prCount = 0, type = SessionType.GYM,
     )
 
-    // getVisitStats returns streak 4; logSession returns the ticked-up 5.
-    private val progress = FakeProgressRepository(recent = lastSession, afterLog = stats(streak = 5))
-    private val checkIn = FakeCheckInRepository(stats(streak = 4))
+    // getStreakState returns week streak 4; logSession returns the moved-forward 5.
+    private val progress = FakeProgressRepository(recent = lastSession, afterLog = streak(weekStreak = 5))
+    private val checkIn = FakeCheckInRepository(streak(weekStreak = 4))
 
     @Before fun setUp() = Dispatchers.setMain(dispatcher)
     @After fun tearDown() = Dispatchers.resetMain()
@@ -66,7 +68,7 @@ class LogViewModelTest {
         assertTrue(data.types.contains(SessionType.GYM))
         assertNull(data.selectedType)
         assertEquals(LogDefaults.DURATION_DEFAULT, data.durationMin)
-        assertEquals(4, data.currentStreak)
+        assertEquals(4, data.streak.weekStreak)
         assertFalse(data.justLogged)
     }
 
@@ -87,7 +89,7 @@ class LogViewModelTest {
         advanceUntilIdle()
         val data = loaded(vm)
         assertTrue(data.justLogged)
-        assertEquals(5, data.currentStreak)
+        assertEquals(5, data.streak.weekStreak)
         assertEquals(SessionType.CARDIO, data.selectedType)
     }
 
@@ -115,26 +117,42 @@ class LogViewModelTest {
         assertEquals(60, data.durationMin)
     }
 
+    @Test
+    fun `set duration jumps to the chosen preset and clamps out-of-range values`() = runTest(dispatcher) {
+        val vm = viewModel()
+        advanceUntilIdle()
+        vm.onIntent(LogIntent.SetDuration(60))
+        assertEquals(60, loaded(vm).durationMin)
+        vm.onIntent(LogIntent.SetDuration(9999))
+        assertEquals(LogDefaults.DURATION_MAX, loaded(vm).durationMin)
+    }
+
     private companion object {
-        fun stats(streak: Int) = VisitStats(currentStreak = streak, totalVisits = 80, visitsThisMonth = 10, lastVisit = null)
+        fun streak(weekStreak: Int) =
+            StreakState(weeklyTarget = 4, sessionsThisWeek = 2, weekStreak = weekStreak, freezesAvailable = 1)
     }
 }
 
 private class FakeProgressRepository(
     private val recent: WorkoutSession,
-    private val afterLog: VisitStats,
+    private val afterLog: StreakState,
 ) : ProgressRepository {
     override suspend fun getWorkoutLogs(): List<WorkoutLogEntry> = emptyList()
     override suspend fun getRecentSession(): WorkoutSession = recent
     override suspend fun getPersonalRecords(): List<PersonalRecord> = emptyList()
     override suspend fun getVolumeTrend(days: Int): List<VolumePoint> = emptyList()
+    override suspend fun getTrainingDays(days: Int): List<TrainingDay> = emptyList()
+    override suspend fun getVisitStats(): VisitStats = VisitStats(totalVisits = 80, visitsThisMonth = 10, lastVisit = null)
     override suspend fun getBodyMetrics(): List<BodyMetric> = emptyList()
     override suspend fun getAchievements(): List<Achievement> = emptyList()
-    override suspend fun logSession(type: SessionType, durationMin: Int): VisitStats = afterLog
+    override suspend fun getStreakState(): StreakState = afterLog
+    override suspend fun setWeeklyTarget(target: Int): StreakState = afterLog.copy(weeklyTarget = target)
+    override suspend fun logSession(type: SessionType, durationMin: Int): StreakState = afterLog
 }
 
-private class FakeCheckInRepository(private val stats: VisitStats) : CheckInRepository {
+private class FakeCheckInRepository(private val streak: StreakState) : CheckInRepository {
     override suspend fun getCheckIns(): List<CheckIn> = emptyList()
-    override suspend fun getVisitStats(): VisitStats = stats
+    override suspend fun getVisitStats(): VisitStats = VisitStats(totalVisits = 80, visitsThisMonth = 10, lastVisit = null)
     override suspend fun getWeeklyActivity(): WeeklyActivity = WeeklyActivity(emptyList(), 0, 0)
+    override suspend fun getStreakState(): StreakState = streak
 }

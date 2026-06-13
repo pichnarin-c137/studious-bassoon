@@ -23,6 +23,8 @@ import com.gymapp.data.model.PlanType
 import com.gymapp.data.model.PtContact
 import com.gymapp.data.model.Referral
 import com.gymapp.data.model.SessionType
+import com.gymapp.data.model.TrainingDay
+import com.gymapp.data.model.StreakState
 import com.gymapp.data.model.VisitStats
 import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WeeklyActivity
@@ -84,10 +86,25 @@ object MockData {
     }
 
     val visitStats = VisitStats(
-        currentStreak = 4,
         totalVisits = 86,
         visitsThisMonth = 12,
         lastVisit = checkIns.first().timestamp,
+    )
+
+    // The kind streak's default weekly target — shared with [weeklyActivity] so Home's week bars and
+    // the streak goal always agree.
+    const val WEEKLY_TARGET_DEFAULT = 5
+
+    /**
+     * The kind streak: an 8-week run of hitting the weekly target, with this week's progress derived
+     * from the same Mon→Sun pattern as [weeklyActivity] (so it tracks the real weekday — e.g. "4 / 5,
+     * 1 to your weekly goal"), and one freeze banked. A rest day never touches this.
+     */
+    fun streakState() = StreakState(
+        weeklyTarget = WEEKLY_TARGET_DEFAULT,
+        sessionsThisWeek = weeklyActivity().sessionsDone,
+        weekStreak = 8,
+        freezesAvailable = 1,
     )
 
     val workouts = listOf(
@@ -120,6 +137,38 @@ object MockData {
         VolumePoint(date = now - d * DAY, volumeKg = (base + wobble).coerceAtLeast(1800.0))
     }
 
+    // Gym-dominant rotation (Cambodian iron-gym culture), repeated across the history.
+    private val sessionCycle = listOf(
+        SessionType.GYM, SessionType.GYM, SessionType.CARDIO,
+        SessionType.GYM, SessionType.BODYWEIGHT, SessionType.GYM, SessionType.CARDIO,
+    )
+
+    // 90 days of training history: ~3 sessions/week early, ramping to ~5/week recently, with the
+    // last four days trained (so the recent weeks clear the streakState weekly target). Honest
+    // quick-log facts only — type + duration, no set/volume. Range queries return the tail.
+    val trainingDays: List<TrainingDay> = (89 downTo 0).map { d ->
+        val i = 89 - d          // 0 = oldest, 89 = today
+        val slot = i % 7
+        val week = i / 7        // 0..12, ascending toward today
+        val trained = when {
+            d <= 3 -> true                              // recent unbroken streak
+            slot == 0 || slot == 2 || slot == 4 -> true // base 3×/week
+            slot == 5 && week >= 4 -> true              // 4×/week from mid-history
+            slot == 6 && week >= 9 -> true              // 5×/week in the last few weeks
+            else -> false
+        }
+        if (trained) {
+            TrainingDay(
+                date = now - d * DAY,
+                trained = true,
+                type = sessionCycle[i % sessionCycle.size],
+                durationMin = 35 + (i * 5) % 36, // 35..70 min, deterministic
+            )
+        } else {
+            TrainingDay(date = now - d * DAY, trained = false)
+        }
+    }
+
     // Current calendar week, Mon→Sun. `true` = a session was logged; days after today are still
     // ahead, so they never count as done. Computed per fetch so it tracks the real weekday.
     private val weekPattern = listOf(true, true, false, true, false, true, false) // Mon..Sun
@@ -132,7 +181,7 @@ object MockData {
         return WeeklyActivity(
             days = days,
             sessionsDone = days.count { it.done },
-            sessionsTarget = 5,
+            sessionsTarget = WEEKLY_TARGET_DEFAULT,
         )
     }
 

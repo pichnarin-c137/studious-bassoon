@@ -16,7 +16,10 @@ import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.LogSessionRequest
 import com.gymapp.data.model.Plan
 import com.gymapp.data.model.Referral
+import com.gymapp.data.model.StreakState
+import com.gymapp.data.model.TrainingDay
 import com.gymapp.data.model.VisitStats
+import com.gymapp.data.model.WeeklyTargetRequest
 import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WeeklyActivity
 import com.gymapp.data.model.WorkoutLogEntry
@@ -62,6 +65,12 @@ interface GymApi {
     @GET("checkins/week")
     suspend fun getWeeklyActivity(): WeeklyActivity
 
+    @GET("streak")
+    suspend fun getStreakState(): StreakState
+
+    @POST("streak/target")
+    suspend fun setWeeklyTarget(@Body request: WeeklyTargetRequest): StreakState
+
     @GET("progress/workouts")
     suspend fun getWorkoutLogs(): List<WorkoutLogEntry>
 
@@ -69,13 +78,16 @@ interface GymApi {
     suspend fun getRecentSession(): WorkoutSession
 
     @POST("progress/sessions")
-    suspend fun logSession(@Body request: LogSessionRequest): VisitStats
+    suspend fun logSession(@Body request: LogSessionRequest): StreakState
 
     @GET("progress/records")
     suspend fun getPersonalRecords(): List<PersonalRecord>
 
     @GET("progress/volume")
     suspend fun getVolumeTrend(@Query("days") days: Int): List<VolumePoint>
+
+    @GET("progress/training-days")
+    suspend fun getTrainingDays(@Query("days") days: Int): List<TrainingDay>
 
     @GET("progress/body")
     suspend fun getBodyMetrics(): List<BodyMetric>

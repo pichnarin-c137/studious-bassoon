@@ -33,6 +33,24 @@ data class VolumePoint(
     val volumeKg: Double,
 )
 
+/**
+ * One day in the consistency history. [trained] drives the per-day mark on the Progress strip;
+ * [type] and [durationMin] (zero on rest days) feed the training-mix and time-invested totals. Built
+ * from honest quick-log facts only — no set/volume data.
+ */
+data class TrainingDay(
+    val date: Long,
+    val trained: Boolean,
+    val type: SessionType? = null,
+    val durationMin: Int = 0,
+)
+
+/** How many sessions of one [type] fell in the active Progress window — for the training-mix bar. */
+data class TypeCount(
+    val type: SessionType,
+    val count: Int,
+)
+
 /** A single day in the current-week training chart. The weekday label is derived from [date]. */
 data class DaySession(
     val date: Long,

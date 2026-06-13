@@ -6,7 +6,6 @@ data class CheckIn(
 )
 
 data class VisitStats(
-    val currentStreak: Int,
     val totalVisits: Int,
     val visitsThisMonth: Int,
     val lastVisit: Long?,

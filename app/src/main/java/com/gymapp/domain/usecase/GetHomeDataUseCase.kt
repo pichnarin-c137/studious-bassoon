@@ -18,7 +18,8 @@ class GetHomeDataUseCase @Inject constructor(
         val membership = async { membershipRepository.getMembership() }
         val branch = async { membershipRepository.getBranch() }
         val stats = async { checkInRepository.getVisitStats() }
+        val streak = async { checkInRepository.getStreakState() }
         val weekly = async { checkInRepository.getWeeklyActivity() }
-        HomeData(member.await(), membership.await(), branch.await(), stats.await(), weekly.await())
+        HomeData(member.await(), membership.await(), branch.await(), stats.await(), streak.await(), weekly.await())
     }
 }

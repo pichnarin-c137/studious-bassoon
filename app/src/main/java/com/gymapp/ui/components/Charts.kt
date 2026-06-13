@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.gymapp.data.model.DaySession
 import com.gymapp.data.model.HourLoad
+import com.gymapp.data.model.TrainingDay
 import com.gymapp.ui.theme.Spacing
 import com.gymapp.ui.theme.accentInk
 import com.gymapp.util.DateTimeUtil
@@ -97,6 +98,89 @@ fun BusynessStrip(hourly: List<HourLoad>, modifier: Modifier = Modifier) {
                     .clip(RoundedCornerShape(50))
                     .background(if (h.current) MaterialTheme.colorScheme.accentInk else muted),
             )
+        }
+    }
+}
+
+/**
+ * Per-day training consistency over the selected window: a lime tick on a trained day (taller for a
+ * longer session), a small muted dot on a rest day. Scales from a handful of fat ticks (7d) to a
+ * dense streak strip (90d) — the same lime-tick / muted-dot convention as [WeekBarChart], generalised
+ * to any day count. Lime is allowed here: a trained day is positive progress.
+ */
+@Composable
+fun ConsistencyStrip(days: List<TrainingDay>, modifier: Modifier = Modifier) {
+    val miss = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.30f)
+    val accent = MaterialTheme.colorScheme.accentInk
+    val area = 44.dp
+    Row(
+        modifier = modifier.fillMaxWidth().height(area),
+        horizontalArrangement = Arrangement.spacedBy(if (days.size > 30) 2.dp else Spacing.xs),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        days.forEach { day ->
+            Box(
+                modifier = Modifier.weight(1f).height(area),
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                if (day.trained) {
+                    // 30..90 min → 55%..100% of the strip height, so time invested reads as texture.
+                    val frac = ((day.durationMin - 30).coerceIn(0, 60)) / 60f
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(area * (0.55f + 0.45f * frac))
+                            .clip(RoundedCornerShape(50))
+                            .background(accent),
+                    )
+                } else {
+                    Box(Modifier.size(5.dp).clip(CircleShape).background(miss))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Training-type mix as a thin proportional bar over a small swatch legend. Deliberately NEUTRAL
+ * (stepped onSurface alphas, never lime) — a mix isn't a CTA / active / positive signal, so it stays
+ * off the accent budget. [segments] are pre-resolved (label, count) pairs in display order.
+ */
+@Composable
+fun TypeMixBar(segments: List<Pair<String, Int>>, modifier: Modifier = Modifier) {
+    if (segments.isEmpty()) return
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val shades = listOf(0.85f, 0.50f, 0.28f) // distinct neutral steps
+    fun shade(index: Int) = onSurface.copy(alpha = shades[index % shades.size])
+
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(50)),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            segments.forEachIndexed { index, (_, count) ->
+                Box(
+                    Modifier
+                        .weight(count.toFloat().coerceAtLeast(0.001f))
+                        .height(10.dp)
+                        .background(shade(index)),
+                )
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            segments.forEachIndexed { index, (label, count) ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                ) {
+                    Box(Modifier.size(8.dp).clip(CircleShape).background(shade(index)))
+                    Text(
+                        text = "$label $count",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
     }
 }

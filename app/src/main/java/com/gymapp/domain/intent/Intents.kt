@@ -35,6 +35,7 @@ sealed interface ProgressIntent {
     data object Load : ProgressIntent
     data object Retry : ProgressIntent
     data class SetRange(val range: TimeRange) : ProgressIntent
+    data class SetWeeklyTarget(val target: Int) : ProgressIntent
 }
 
 sealed interface LogIntent {
@@ -43,6 +44,7 @@ sealed interface LogIntent {
     data class SelectType(val type: SessionType) : LogIntent
     data object IncrementDuration : LogIntent
     data object DecrementDuration : LogIntent
+    data class SetDuration(val durationMin: Int) : LogIntent
     data object RepeatLast : LogIntent
     data object Submit : LogIntent
     data object LogAnother : LogIntent

@@ -29,26 +29,28 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gymapp.R
-import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.TimeRange
 import com.gymapp.data.model.WorkoutSession
 import com.gymapp.domain.intent.ProgressIntent
 import com.gymapp.domain.state.ProgressData
+import com.gymapp.ui.components.ConsistencyStrip
 import com.gymapp.ui.components.Hairline
 import com.gymapp.ui.components.MetricBlock
 import com.gymapp.ui.components.OverlineLabel
 import com.gymapp.ui.components.ScreenContainer
 import com.gymapp.ui.components.StatNumber
-import com.gymapp.ui.components.TrendLineChart
+import com.gymapp.ui.components.TypeMixBar
 import com.gymapp.ui.components.UiStateContent
+import com.gymapp.ui.screens.log.labelRes
 import com.gymapp.ui.theme.Spacing
 import com.gymapp.ui.theme.accentInk
 import com.gymapp.util.DateTimeUtil
 import java.util.Locale
-import kotlin.math.roundToInt
 
-private fun oneDecimal(value: Double): String = String.format(Locale.US, "%.1f", value)
-private fun grouped(value: Double): String = String.format(Locale.US, "%,d", value.roundToInt())
+private fun hours(minutes: Int): String = String.format(Locale.US, "%.1f", minutes / 60.0)
+
+/** Selectable weekly session targets for the inline goal setter (matches the API's accepted range). */
+private val WEEKLY_TARGET_OPTIONS = listOf(3, 4, 5, 6)
 
 @StringRes
 private fun TimeRange.labelRes(): Int = when (this) {
@@ -61,12 +63,20 @@ private fun TimeRange.labelRes(): Int = when (this) {
 fun ProgressScreen(viewModel: ProgressViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     UiStateContent(state, onRetry = { viewModel.onIntent(ProgressIntent.Retry) }) { data ->
-        ProgressContent(data, onSetRange = { viewModel.onIntent(ProgressIntent.SetRange(it)) })
+        ProgressContent(
+            data,
+            onSetRange = { viewModel.onIntent(ProgressIntent.SetRange(it)) },
+            onSetTarget = { viewModel.onIntent(ProgressIntent.SetWeeklyTarget(it)) },
+        )
     }
 }
 
 @Composable
-private fun ProgressContent(data: ProgressData, onSetRange: (TimeRange) -> Unit) {
+private fun ProgressContent(
+    data: ProgressData,
+    onSetRange: (TimeRange) -> Unit,
+    onSetTarget: (Int) -> Unit,
+) {
     ScreenContainer {
         OverlineLabel(stringResource(R.string.progress_title))
 
@@ -94,37 +104,145 @@ private fun ProgressContent(data: ProgressData, onSetRange: (TimeRange) -> Unit)
 
         Hairline()
 
-        // Volume lifted
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        // Consistency hero — the kind streak: weeks of hitting the weekly goal (a rest day never
+        // breaks it), this week's progress, banked freezes, and an inline goal setter, over the
+        // per-day strip for the window.
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Top,
             ) {
-                OverlineLabel(stringResource(R.string.progress_volume_trend))
-                DeltaBadge(data.volumeDeltaPct)
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+                    OverlineLabel(stringResource(R.string.progress_week_streak))
+                    StatNumber(data.streak.weekStreak.toString(), size = 44.sp)
+                }
+                if (data.streak.freezesAvailable > 0) FreezeBadge(data.streak.freezesAvailable)
             }
-            val latest = data.volumeTrend.lastOrNull()?.volumeKg ?: 0.0
-            StatNumber(stringResource(R.string.progress_unit_kg, grouped(latest)), size = 40.sp)
-            TrendLineChart(values = data.volumeTrend.map { it.volumeKg })
+            Text(
+                text = if (data.streak.goalMet) {
+                    stringResource(R.string.streak_goal_met)
+                } else {
+                    stringResource(
+                        R.string.progress_weekly_goal,
+                        data.streak.sessionsThisWeek,
+                        data.streak.weeklyTarget,
+                    )
+                },
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                color = if (data.streak.goalMet) {
+                    MaterialTheme.colorScheme.accentInk
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
+            ConsistencyStrip(data.days)
+            WeeklyGoalSetter(current = data.streak.weeklyTarget, onSet = onSetTarget)
         }
 
         Hairline()
 
-        // Recent session
+        // Time invested over the window — all from honest quick-log facts (showing up + duration).
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            MetricBlock(
+                value = data.sessionCount.toString(),
+                label = stringResource(R.string.progress_sessions),
+                modifier = Modifier.weight(1f),
+                valueSize = 24.sp,
+                horizontalAlignment = Alignment.Start,
+            )
+            MetricBlock(
+                value = hours(data.totalMinutes),
+                label = stringResource(R.string.progress_hours),
+                modifier = Modifier.weight(1f),
+                valueSize = 24.sp,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            )
+            MetricBlock(
+                value = data.avgMinutes.toString(),
+                label = stringResource(R.string.progress_avg),
+                modifier = Modifier.weight(1f),
+                valueSize = 24.sp,
+                horizontalAlignment = Alignment.End,
+            )
+        }
+
+        Hairline()
+
+        // Training mix — neutral proportion bar, off the lime budget.
+        if (data.typeMix.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                OverlineLabel(stringResource(R.string.progress_training_mix))
+                TypeMixBar(segments = data.typeMix.map { stringResource(it.type.labelRes()) to it.count })
+            }
+            Hairline()
+        }
+
+        // Last session — honest summary: type · duration · when (no fabricated volume/sets).
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            OverlineLabel(stringResource(R.string.progress_recent_session))
-            RecentSession(data.recentSession)
+            OverlineLabel(stringResource(R.string.progress_last_session))
+            LastSession(data.lastSession)
         }
 
         Hairline()
 
-        // Personal records
-        OverlineLabel(stringResource(R.string.progress_personal_records))
-        data.personalRecords.forEachIndexed { index, record ->
-            PersonalRecordRow(record)
-            if (index < data.personalRecords.lastIndex) Hairline()
+        // Strength — set-level stub; lights up when detailed logging lands.
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            OverlineLabel(stringResource(R.string.progress_strength))
+            Text(
+                text = stringResource(R.string.progress_strength_stub),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
+    }
+}
+
+/** Inline weekly-target setter: tap a number to change how many sessions a week clear the streak. */
+@Composable
+private fun WeeklyGoalSetter(current: Int, onSet: (Int) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        OverlineLabel(stringResource(R.string.progress_goal_label))
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            WEEKLY_TARGET_OPTIONS.forEach { target ->
+                RangeToggle(
+                    label = target.toString(),
+                    selected = target == current,
+                    onClick = { onSet(target) },
+                )
+            }
+        }
+    }
+}
+
+/** Banked streak freezes — neutral (a safety net, not the next action), snowflake + count. */
+@Composable
+private fun FreezeBadge(count: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_freeze),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(16.dp),
+        )
+        Text(
+            text = count.toString(),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OverlineLabel(stringResource(R.string.progress_freeze_label))
     }
 }
 
@@ -152,20 +270,7 @@ private fun RangeToggle(label: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun DeltaBadge(deltaPct: Double) {
-    val rounded = deltaPct.roundToInt()
-    val positive = rounded >= 0
-    val signed = (if (positive) "+" else "") + rounded.toString()
-    Text(
-        text = stringResource(R.string.progress_unit_pct, signed),
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Medium,
-        color = if (positive) MaterialTheme.colorScheme.accentInk else MaterialTheme.colorScheme.error,
-    )
-}
-
-@Composable
-private fun RecentSession(session: WorkoutSession) {
+private fun LastSession(session: WorkoutSession) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -173,41 +278,19 @@ private fun RecentSession(session: WorkoutSession) {
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             Text(session.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+            val relative = DateTimeUtil.relative(session.performedAt)
+            val typeLabel = session.type?.let { stringResource(it.labelRes()) }
             Text(
-                text = "${DateTimeUtil.relative(session.performedAt)}  ·  ${
-                    stringResource(R.string.progress_unit_min, session.durationMin)
-                }",
+                text = if (typeLabel != null) {
+                    stringResource(R.string.progress_session_meta, typeLabel, session.durationMin, relative)
+                } else {
+                    stringResource(R.string.progress_session_meta_notype, session.durationMin, relative)
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         if (session.prCount > 0) PrInline(session.prCount)
-    }
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-    ) {
-        MetricBlock(
-            value = grouped(session.volumeKg),
-            label = stringResource(R.string.progress_stat_volume),
-            modifier = Modifier.weight(1f),
-            valueSize = 24.sp,
-            horizontalAlignment = Alignment.Start,
-        )
-        MetricBlock(
-            value = session.totalSets.toString(),
-            label = stringResource(R.string.progress_stat_sets),
-            modifier = Modifier.weight(1f),
-            valueSize = 24.sp,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        )
-        MetricBlock(
-            value = session.kcal.toString(),
-            label = stringResource(R.string.progress_stat_kcal),
-            modifier = Modifier.weight(1f),
-            valueSize = 24.sp,
-            horizontalAlignment = Alignment.End,
-        )
     }
 }
 
@@ -226,25 +309,5 @@ private fun PrInline(count: Int) {
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.accentInk,
         )
-    }
-}
-
-@Composable
-private fun PersonalRecordRow(record: PersonalRecord) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.sm),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(record.exercise, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-            StatNumber(stringResource(R.string.progress_unit_kg, oneDecimal(record.bestKg)), size = 18.sp)
-            Text(
-                text = "▲ " + stringResource(R.string.progress_pr_delta, oneDecimal(record.improvementKg)),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.accentInk,
-            )
-        }
     }
 }

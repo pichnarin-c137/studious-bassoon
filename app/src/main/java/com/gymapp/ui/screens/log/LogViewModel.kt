@@ -39,6 +39,9 @@ class LogViewModel @Inject constructor(
             LogIntent.DecrementDuration -> update {
                 it.copy(durationMin = (it.durationMin - LogDefaults.DURATION_STEP).coerceAtLeast(LogDefaults.DURATION_MIN))
             }
+            is LogIntent.SetDuration -> update {
+                it.copy(durationMin = intent.durationMin.coerceIn(LogDefaults.DURATION_MIN, LogDefaults.DURATION_MAX))
+            }
             LogIntent.RepeatLast -> update { d ->
                 d.copy(
                     selectedType = d.lastSession?.type ?: d.selectedType,
@@ -71,8 +74,8 @@ class LogViewModel @Inject constructor(
         val type = data.selectedType ?: return // CTA is disabled until a type is picked.
         viewModelScope.launch {
             try {
-                val stats = logSession(type, data.durationMin)
-                update { it.copy(justLogged = true, currentStreak = stats.currentStreak) }
+                val streak = logSession(type, data.durationMin)
+                update { it.copy(justLogged = true, streak = streak) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

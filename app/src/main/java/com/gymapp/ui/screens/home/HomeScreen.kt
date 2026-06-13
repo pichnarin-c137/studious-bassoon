@@ -128,7 +128,7 @@ private fun HomeContent(
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             MetricBlock(
-                value = pad2(data.stats.currentStreak),
+                value = pad2(data.streak.weekStreak),
                 label = stringResource(R.string.home_metric_streak),
                 modifier = Modifier.weight(1f),
                 horizontalAlignment = Alignment.Start,
@@ -168,6 +168,17 @@ private fun HomeContent(
                 )
             }
             WeekBarChart(data.weeklyActivity.days)
+            // Habit nudge — a reason to open on a rest day. Lime, never guilt-based.
+            Text(
+                text = if (data.streak.goalMet) {
+                    stringResource(R.string.streak_goal_met)
+                } else {
+                    stringResource(R.string.home_goal_remaining, data.streak.sessionsRemaining)
+                },
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.accentInk,
+            )
         }
 
         Hairline()

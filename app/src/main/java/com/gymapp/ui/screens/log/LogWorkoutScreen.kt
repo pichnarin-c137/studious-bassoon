@@ -1,13 +1,14 @@
 package com.gymapp.ui.screens.log
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -24,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,6 +46,9 @@ import com.gymapp.ui.components.UiStateContent
 import com.gymapp.ui.theme.Spacing
 import com.gymapp.ui.theme.accentInk
 
+/** Quick-pick durations beside the stepper — the common session lengths, one tap each. */
+private val DURATION_PRESETS = listOf(30, 45, 60, 90)
+
 @Composable
 fun LogWorkoutScreen(viewModel: LogViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -56,26 +62,48 @@ fun LogWorkoutScreen(viewModel: LogViewModel = hiltViewModel()) {
 }
 
 /** The sub-10-second daily log: pick a type, nudge the duration, tap Log. */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun LogForm(data: LogData, onIntent: (LogIntent) -> Unit) {
     ScreenContainer {
-        OverlineLabel(stringResource(R.string.log_title))
+        // Header: the motivating week-progress is given weight — lime pips, not muted text.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OverlineLabel(stringResource(R.string.log_title))
+            WeekPips(done = data.streak.sessionsThisWeek, target = data.streak.weeklyTarget)
+        }
         Text(
-            text = stringResource(R.string.log_streak_line, data.currentStreak),
+            text = if (data.streak.goalMet) {
+                stringResource(R.string.streak_goal_met)
+            } else {
+                stringResource(
+                    R.string.log_week_progress,
+                    data.streak.sessionsThisWeek,
+                    data.streak.weeklyTarget,
+                )
+            },
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = if (data.streak.goalMet) FontWeight.Medium else FontWeight.Normal,
+            color = if (data.streak.goalMet) {
+                MaterialTheme.colorScheme.accentInk
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
         )
 
         Hairline()
 
+        // The primary choice — icon tiles, not text pills, so it reads as the hero decision.
         OverlineLabel(stringResource(R.string.log_question))
-        FlowRow(
+        Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             data.types.forEach { type ->
-                TypeChip(
+                TypeTile(
+                    icon = type.iconRes(),
                     label = stringResource(type.labelRes()),
                     selected = type == data.selectedType,
                     onClick = { onIntent(LogIntent.SelectType(type)) },
@@ -83,12 +111,26 @@ private fun LogForm(data: LogData, onIntent: (LogIntent) -> Unit) {
             }
         }
 
+        // Duration as the mono hero — the big number anchors the screen — plus one-tap presets.
         OverlineLabel(stringResource(R.string.log_duration))
-        DurationStepper(
+        DurationHero(
             durationMin = data.durationMin,
             onLess = { onIntent(LogIntent.DecrementDuration) },
             onMore = { onIntent(LogIntent.IncrementDuration) },
         )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            DURATION_PRESETS.forEach { preset ->
+                PresetChip(
+                    value = preset,
+                    selected = preset == data.durationMin,
+                    onClick = { onIntent(LogIntent.SetDuration(preset)) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
 
         data.lastSession?.let { last ->
             Hairline()
@@ -118,11 +160,11 @@ private fun LogConfirmation(data: LogData, onIntent: (LogIntent) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             StatNumber(
-                value = data.currentStreak.toString(),
+                value = data.streak.weekStreak.toString(),
                 size = 72.sp,
                 color = MaterialTheme.colorScheme.accentInk,
             )
-            OverlineLabel(stringResource(R.string.log_day_streak))
+            OverlineLabel(stringResource(R.string.log_week_streak))
             data.selectedType?.let { type ->
                 Text(
                     text = stringResource(
@@ -134,6 +176,15 @@ private fun LogConfirmation(data: LogData, onIntent: (LogIntent) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            // Kind celebration: once the week's target is cleared, say so in lime — never guilt.
+            if (data.streak.goalMet) {
+                Text(
+                    text = stringResource(R.string.streak_goal_met),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.accentInk,
+                )
+            }
         }
         Spacer(Modifier.height(Spacing.sm))
         Hairline()
@@ -143,38 +194,59 @@ private fun LogConfirmation(data: LogData, onIntent: (LogIntent) -> Unit) {
     }
 }
 
-/** Pill chip — lime border + ink when active (selection ink, never a lime fill). */
+/** This week's progress as pips: one filled lime dot per logged session, hollow for the rest of the goal. */
 @Composable
-private fun TypeChip(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun WeekPips(done: Int, target: Int) {
+    val accent = MaterialTheme.colorScheme.accentInk
+    val miss = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.30f)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        repeat(target.coerceAtLeast(1)) { index ->
+            Box(Modifier.size(9.dp).clip(CircleShape).background(if (index < done) accent else miss))
+        }
+    }
+}
+
+/** A type as a tappable tile: tinted glyph over its label, lime ink + lime border when active (never a fill). */
+@Composable
+private fun RowScope.TypeTile(
+    @DrawableRes icon: Int,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
     val accent = MaterialTheme.colorScheme.accentInk
     val border = if (selected) accent else MaterialTheme.colorScheme.outline
     val fg = if (selected) accent else MaterialTheme.colorScheme.onSurfaceVariant
-    Box(
+    Column(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .border(1.dp, border, RoundedCornerShape(50))
+            .weight(1f)
+            .clip(RoundedCornerShape(14.dp))
+            .border(1.dp, border, RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = Spacing.md, vertical = 10.dp),
+            .padding(vertical = Spacing.md),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
+        Icon(painterResource(icon), contentDescription = null, tint = fg, modifier = Modifier.size(26.dp))
         Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium, color = fg)
     }
 }
 
+/** The big mono minutes count flanked by the −/+ steppers — the focal element of the form. */
 @Composable
-private fun DurationStepper(durationMin: Int, onLess: () -> Unit, onMore: () -> Unit) {
+private fun DurationHero(durationMin: Int, onLess: () -> Unit, onMore: () -> Unit) {
     Row(
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xl, Alignment.CenterHorizontally),
     ) {
         StepButton("−", enabled = durationMin > LogDefaults.DURATION_MIN, onClick = onLess)
-        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-            StatNumber(durationMin.toString(), size = 40.sp)
-            Text(
-                text = stringResource(R.string.log_min_label),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 6.dp),
-            )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            StatNumber(durationMin.toString(), size = 56.sp)
+            OverlineLabel(stringResource(R.string.log_min_label))
         }
         StepButton("+", enabled = durationMin < LogDefaults.DURATION_MAX, onClick = onMore)
     }
@@ -196,6 +268,24 @@ private fun StepButton(symbol: String, enabled: Boolean, onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         Text(symbol, style = MaterialTheme.typography.titleLarge, color = color)
+    }
+}
+
+/** One-tap preset minutes — lime ink + border on the current value (active selection), matching the type tiles. */
+@Composable
+private fun PresetChip(value: Int, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val accent = MaterialTheme.colorScheme.accentInk
+    val border = if (selected) accent else MaterialTheme.colorScheme.outline
+    val fg = if (selected) accent else MaterialTheme.colorScheme.onSurfaceVariant
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .border(1.dp, border, RoundedCornerShape(50))
+            .clickable(onClick = onClick)
+            .padding(vertical = Spacing.sm),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(value.toString(), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium, color = fg)
     }
 }
 
