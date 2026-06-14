@@ -14,11 +14,15 @@ import com.gymapp.data.model.VisitStats
 import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WeeklyTargetRequest
 import com.gymapp.data.model.WorkoutLogEntry
+import com.gymapp.data.model.WorkoutPlan
 import com.gymapp.data.model.WorkoutSession
 import javax.inject.Inject
 
 interface ProgressRepository {
     suspend fun getWorkoutLogs(): List<WorkoutLogEntry>
+
+    /** Owner-provisioned workout templates a member can pull into a live session. */
+    suspend fun getWorkoutPlans(): List<WorkoutPlan>
     suspend fun getRecentSession(): WorkoutSession
     suspend fun getPersonalRecords(): List<PersonalRecord>
     suspend fun getVolumeTrend(days: Int): List<VolumePoint>
@@ -53,6 +57,7 @@ class ProgressRepositoryImpl @Inject constructor(
     private val api: GymApi,
 ) : ProgressRepository {
     override suspend fun getWorkoutLogs(): List<WorkoutLogEntry> = api.getWorkoutLogs()
+    override suspend fun getWorkoutPlans(): List<WorkoutPlan> = api.getWorkoutPlans()
     override suspend fun getRecentSession(): WorkoutSession = api.getRecentSession()
     override suspend fun getPersonalRecords(): List<PersonalRecord> = api.getPersonalRecords()
     override suspend fun getVolumeTrend(days: Int): List<VolumePoint> = api.getVolumeTrend(days)

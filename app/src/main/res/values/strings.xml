@@ -209,6 +209,12 @@
     <string name="session_done">Done</string>
     <string name="session_set_weighted">%1$s kg × %2$d</string>
     <string name="session_set_reps">× %1$d</string>
+    <string name="session_from_plan">From a plan</string>
+    <string name="session_plan_freeform">Freeform</string>
+    <string name="plan_target">%1$d × %2$d</string>
+    <string name="progress_volume">Volume lifted</string>
+    <string name="progress_pr_row">%1$s kg</string>
+    <string name="progress_pr_improvement">+%1$s kg</string>
 
     <!-- Activity feed -->
     <string name="activity_from_gym">From your gym</string>

@@ -6,7 +6,9 @@ import com.gymapp.data.model.LoggedExercise
 import com.gymapp.data.model.SessionType
 import com.gymapp.data.model.SetEntry
 import com.gymapp.data.model.StreakState
+import com.gymapp.data.model.WorkoutPlan
 import com.gymapp.domain.intent.SessionIntent
+import com.gymapp.domain.usecase.GetWorkoutPlansUseCase
 import com.gymapp.domain.usecase.LogDetailedSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
@@ -32,6 +34,8 @@ data class SessionUiState(
     val restRemainingSec: Int = 0,
     val submitting: Boolean = false,
     val result: StreakState? = null,
+    val availablePlans: List<WorkoutPlan> = emptyList(),
+    val selectedPlan: WorkoutPlan? = null,
 ) {
     val resting: Boolean get() = restRemainingSec > 0
 
@@ -49,10 +53,23 @@ fun List<DraftSet>.grouped(): List<LoggedExercise> {
 @HiltViewModel
 class SessionViewModel @Inject constructor(
     private val logDetailedSession: LogDetailedSessionUseCase,
+    private val getWorkoutPlans: GetWorkoutPlansUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SessionUiState())
     val state: StateFlow<SessionUiState> = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            try {
+                _state.update { it.copy(availablePlans = getWorkoutPlans()) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Plans are optional guidance; a load failure just leaves a freeform session.
+            }
+        }
+    }
 
     fun onIntent(intent: SessionIntent) {
         when (intent) {
@@ -73,6 +90,7 @@ class SessionViewModel @Inject constructor(
             SessionIntent.RemoveLastSet -> _state.update { it.copy(sets = it.sets.dropLast(1)) }
             is SessionIntent.StartRest -> _state.update { it.copy(restRemainingSec = intent.seconds) }
             SessionIntent.StopRest -> _state.update { it.copy(restRemainingSec = 0) }
+            is SessionIntent.SelectPlan -> _state.update { it.copy(selectedPlan = intent.plan) }
             is SessionIntent.Finish -> finish(intent.note)
         }
     }

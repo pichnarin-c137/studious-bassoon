@@ -7,6 +7,7 @@ import com.gymapp.data.model.CheckIn
 import com.gymapp.data.model.Member
 import com.gymapp.data.model.Membership
 import com.gymapp.data.model.Payment
+import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.Plan
 import com.gymapp.data.model.Referral
 import com.gymapp.data.model.SessionType
@@ -15,6 +16,7 @@ import com.gymapp.data.model.TimeRange
 import com.gymapp.data.model.TrainingDay
 import com.gymapp.data.model.TypeCount
 import com.gymapp.data.model.VisitStats
+import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WeeklyActivity
 import com.gymapp.data.model.WorkoutSession
 
@@ -56,6 +58,8 @@ data class ProgressData(
     val avgMinutes: Int,
     val typeMix: List<TypeCount>,
     val lastSession: WorkoutSession,
+    val personalRecords: List<PersonalRecord>,
+    val volumeTrend: List<VolumePoint>,
 )
 
 data class ProfileData(

@@ -1,5 +1,6 @@
 package com.gymapp.data.api
 
+import com.gymapp.data.local.WorkoutAnalytics
 import com.gymapp.data.local.WorkoutStore
 import com.gymapp.data.model.Achievement
 import com.gymapp.data.model.ActivityFeedItem
@@ -26,6 +27,7 @@ import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WeeklyTargetRequest
 import com.gymapp.data.model.WeeklyActivity
 import com.gymapp.data.model.WorkoutLogEntry
+import com.gymapp.data.model.WorkoutPlan
 import com.gymapp.data.model.WorkoutSession
 import com.gymapp.data.model.toWorkoutSession
 import kotlinx.coroutines.delay
@@ -96,6 +98,7 @@ class FakeGymApi @Inject constructor(
         return respond(currentStreakState())
     }
     override suspend fun getWorkoutLogs(): List<WorkoutLogEntry> = respond(MockData.workouts)
+    override suspend fun getWorkoutPlans(): List<WorkoutPlan> = respond(MockData.workoutPlans)
     override suspend fun getRecentSession(): WorkoutSession =
         respond(store.mostRecent()?.toWorkoutSession() ?: MockData.workoutSessions.first())
 
@@ -114,6 +117,7 @@ class FakeGymApi @Inject constructor(
 
     override suspend fun logDetailedSession(request: DetailedLogRequest): StreakState {
         registerLoggedSession()
+        val prCount = WorkoutAnalytics.prCount(request.exercises, WorkoutAnalytics.bestPerExercise(store.all()))
         store.append(
             StoredSession(
                 id = "sess_${System.currentTimeMillis()}",
@@ -122,6 +126,7 @@ class FakeGymApi @Inject constructor(
                 performedAt = System.currentTimeMillis(),
                 exercises = request.exercises,
                 note = request.note,
+                prCount = prCount,
             ),
         )
         return respond(currentStreakState())
@@ -143,9 +148,10 @@ class FakeGymApi @Inject constructor(
             }
         }
     }
-    override suspend fun getPersonalRecords(): List<PersonalRecord> = respond(MockData.personalRecords)
+    override suspend fun getPersonalRecords(): List<PersonalRecord> =
+        respond(WorkoutAnalytics.personalRecords(store.all()))
     override suspend fun getVolumeTrend(days: Int): List<VolumePoint> =
-        respond(MockData.volumeTrend.takeLast(days))
+        respond(WorkoutAnalytics.volumeTrend(store.all()).takeLast(days))
     override suspend fun getTrainingDays(days: Int): List<TrainingDay> =
         respond(MockData.trainingDays.takeLast(days))
     override suspend fun getBodyMetrics(): List<BodyMetric> = respond(MockData.bodyMetrics)

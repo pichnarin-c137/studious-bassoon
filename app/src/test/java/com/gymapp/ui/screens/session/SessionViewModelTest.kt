@@ -4,15 +4,18 @@ import com.gymapp.data.model.Achievement
 import com.gymapp.data.model.BodyMetric
 import com.gymapp.data.model.LoggedExercise
 import com.gymapp.data.model.PersonalRecord
+import com.gymapp.data.model.PlannedExercise
 import com.gymapp.data.model.SessionType
 import com.gymapp.data.model.StreakState
 import com.gymapp.data.model.TrainingDay
 import com.gymapp.data.model.VisitStats
 import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WorkoutLogEntry
+import com.gymapp.data.model.WorkoutPlan
 import com.gymapp.data.model.WorkoutSession
 import com.gymapp.data.repository.ProgressRepository
 import com.gymapp.domain.intent.SessionIntent
+import com.gymapp.domain.usecase.GetWorkoutPlansUseCase
 import com.gymapp.domain.usecase.LogDetailedSessionUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,7 +41,9 @@ class SessionViewModelTest {
     @Before fun setUp() = Dispatchers.setMain(dispatcher)
     @After fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = SessionViewModel(LogDetailedSessionUseCase(FakeRepo(streak)))
+    private val repo = FakeRepo(streak)
+    private fun viewModel() =
+        SessionViewModel(LogDetailedSessionUseCase(repo), GetWorkoutPlansUseCase(repo))
 
     @Test
     fun `adding sets groups them by exercise in first-seen order`() {
@@ -85,11 +90,22 @@ class SessionViewModelTest {
         assertNotNull(result)
         assertEquals(6, result!!.weekStreak)
     }
+
+    @Test
+    fun `selecting a plan sets it and clearing returns to freeform`() {
+        val vm = viewModel()
+        val plan = WorkoutPlan("wp", "Push day", listOf(PlannedExercise("Bench press", 4, 8)))
+        vm.onIntent(SessionIntent.SelectPlan(plan))
+        assertEquals(plan, vm.state.value.selectedPlan)
+        vm.onIntent(SessionIntent.SelectPlan(null))
+        assertNull(vm.state.value.selectedPlan)
+    }
 }
 
 /** Minimal repository double — only [logDetailedSession] is exercised; the rest are unused. */
 private class FakeRepo(private val streak: StreakState) : ProgressRepository {
     override suspend fun getWorkoutLogs(): List<WorkoutLogEntry> = emptyList()
+    override suspend fun getWorkoutPlans(): List<WorkoutPlan> = emptyList()
     override suspend fun getRecentSession(): WorkoutSession = error("unused")
     override suspend fun getPersonalRecords(): List<PersonalRecord> = emptyList()
     override suspend fun getVolumeTrend(days: Int): List<VolumePoint> = emptyList()

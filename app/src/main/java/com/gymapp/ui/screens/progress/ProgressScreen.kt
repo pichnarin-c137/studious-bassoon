@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gymapp.R
+import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.TimeRange
 import com.gymapp.data.model.WorkoutSession
 import com.gymapp.domain.intent.ProgressIntent
@@ -39,6 +40,7 @@ import com.gymapp.ui.components.MetricBlock
 import com.gymapp.ui.components.OverlineLabel
 import com.gymapp.ui.components.ScreenContainer
 import com.gymapp.ui.components.StatNumber
+import com.gymapp.ui.components.TrendLineChart
 import com.gymapp.ui.components.TypeMixBar
 import com.gymapp.ui.components.UiStateContent
 import com.gymapp.ui.screens.log.labelRes
@@ -48,6 +50,9 @@ import com.gymapp.util.DateTimeUtil
 import java.util.Locale
 
 private fun hours(minutes: Int): String = String.format(Locale.US, "%.1f", minutes / 60.0)
+
+/** Trims a trailing ".0" so a whole-kg weight reads "60", not "60.0". */
+private fun fmtKg(kg: Double): String = if (kg % 1.0 == 0.0) kg.toInt().toString() else kg.toString()
 
 /** Selectable weekly session targets for the inline goal setter (matches the API's accepted range). */
 private val WEEKLY_TARGET_OPTIONS = listOf(3, 4, 5, 6)
@@ -190,14 +195,22 @@ private fun ProgressContent(
 
         Hairline()
 
-        // Strength — set-level stub; lights up when detailed logging lands.
-        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+        // Strength — real PRs + volume from logged detailed sessions; the stub holds until set data exists.
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             OverlineLabel(stringResource(R.string.progress_strength))
-            Text(
-                text = stringResource(R.string.progress_strength_stub),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (data.personalRecords.isEmpty() && data.volumeTrend.size < 2) {
+                Text(
+                    text = stringResource(R.string.progress_strength_stub),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                if (data.volumeTrend.size >= 2) {
+                    OverlineLabel(stringResource(R.string.progress_volume))
+                    TrendLineChart(values = data.volumeTrend.map { it.volumeKg })
+                }
+                data.personalRecords.forEach { pr -> PrRow(pr) }
+            }
         }
     }
 }
@@ -309,5 +322,45 @@ private fun PrInline(count: Int) {
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.accentInk,
         )
+    }
+}
+
+/** A personal record line: 🏆 exercise · best kg, with the latest improvement in lime. */
+@Composable
+private fun PrRow(pr: PersonalRecord) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_trophy),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.accentInk,
+                modifier = Modifier.size(16.dp),
+            )
+            Text(pr.exercise, style = MaterialTheme.typography.bodyMedium)
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            Text(
+                text = stringResource(R.string.progress_pr_row, fmtKg(pr.bestKg)),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+            )
+            if (pr.improvementKg > 0) {
+                Text(
+                    text = stringResource(R.string.progress_pr_improvement, fmtKg(pr.improvementKg)),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.accentInk,
+                )
+            }
+        }
     }
 }

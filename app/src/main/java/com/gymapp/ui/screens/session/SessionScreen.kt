@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gymapp.R
+import com.gymapp.data.model.PlannedExercise
 import com.gymapp.data.model.SessionType
 import com.gymapp.data.model.SetEntry
 import com.gymapp.domain.intent.SessionIntent
@@ -85,6 +86,7 @@ fun SessionScreen(onExit: () -> Unit, viewModel: SessionViewModel = hiltViewMode
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SessionLive(state: SessionUiState, onIntent: (SessionIntent) -> Unit) {
     var exercise by remember { mutableStateOf("") }
@@ -125,6 +127,41 @@ private fun SessionLive(state: SessionUiState, onIntent: (SessionIntent) -> Unit
         }
 
         Hairline()
+
+        // Pull an owner plan in as a tappable agenda; tapping an exercise pre-fills the composer.
+        if (state.availablePlans.isNotEmpty()) {
+            OverlineLabel(stringResource(R.string.session_from_plan))
+            val plan = state.selectedPlan
+            if (plan == null) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    state.availablePlans.forEach { p ->
+                        PlanChip(p.name, selected = false, onClick = { onIntent(SessionIntent.SelectPlan(p)) })
+                    }
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    PlanChip(plan.name, selected = true, onClick = {})
+                    Text(
+                        text = stringResource(R.string.session_plan_freeform),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.clickable { onIntent(SessionIntent.SelectPlan(null)) },
+                    )
+                }
+                plan.exercises.forEach { pe ->
+                    PlanAgendaRow(pe, onClick = { exercise = pe.name; reps = pe.targetReps.toString() })
+                }
+            }
+            Hairline()
+        }
 
         OverlineLabel(stringResource(R.string.session_exercises))
         val groups = state.sets.grouped()
@@ -366,6 +403,39 @@ private fun RestChip(label: String, onClick: () -> Unit, modifier: Modifier = Mo
             label,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun PlanChip(name: String, selected: Boolean, onClick: () -> Unit) {
+    val accent = MaterialTheme.colorScheme.accentInk
+    val border = if (selected) accent else MaterialTheme.colorScheme.outline
+    val fg = if (selected) accent else MaterialTheme.colorScheme.onSurfaceVariant
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .border(1.dp, border, RoundedCornerShape(50))
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+    ) {
+        Text(name, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium, color = fg)
+    }
+}
+
+/** A plan's exercise as a tappable agenda row — tapping pre-fills the composer with name + target reps. */
+@Composable
+private fun PlanAgendaRow(exercise: PlannedExercise, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(exercise.name, style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = stringResource(R.string.plan_target, exercise.targetSets, exercise.targetReps),
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }

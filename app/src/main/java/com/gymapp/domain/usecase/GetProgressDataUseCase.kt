@@ -22,6 +22,8 @@ class GetProgressDataUseCase @Inject constructor(
         val daysAsync = async { progressRepository.getTrainingDays(range.days) }
         val streakAsync = async { progressRepository.getStreakState() }
         val sessionAsync = async { progressRepository.getRecentSession() }
+        val prsAsync = async { progressRepository.getPersonalRecords() }
+        val volumeAsync = async { progressRepository.getVolumeTrend(range.days) }
 
         val days = daysAsync.await()
         val trained = days.filter { it.trained }
@@ -36,6 +38,8 @@ class GetProgressDataUseCase @Inject constructor(
             avgMinutes = if (trained.isEmpty()) 0 else totalMinutes / trained.size,
             typeMix = typeMix(trained),
             lastSession = sessionAsync.await(),
+            personalRecords = prsAsync.await(),
+            volumeTrend = volumeAsync.await(),
         )
     }
 

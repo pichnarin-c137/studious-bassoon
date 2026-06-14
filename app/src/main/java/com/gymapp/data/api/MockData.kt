@@ -17,18 +17,18 @@ import com.gymapp.data.model.Membership
 import com.gymapp.data.model.MembershipStatus
 import com.gymapp.data.model.Payment
 import com.gymapp.data.model.PaymentMethod
-import com.gymapp.data.model.PersonalRecord
 import com.gymapp.data.model.Plan
 import com.gymapp.data.model.PlanType
+import com.gymapp.data.model.PlannedExercise
 import com.gymapp.data.model.PtContact
 import com.gymapp.data.model.Referral
 import com.gymapp.data.model.SessionType
 import com.gymapp.data.model.TrainingDay
 import com.gymapp.data.model.StreakState
 import com.gymapp.data.model.VisitStats
-import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WeeklyActivity
 import com.gymapp.data.model.WorkoutLogEntry
+import com.gymapp.data.model.WorkoutPlan
 import com.gymapp.data.model.WorkoutSession
 import com.gymapp.util.DateTimeUtil
 
@@ -122,20 +122,42 @@ object MockData {
         WorkoutSession("s_3", "Legs", now - 3 * DAY - 4 * HOUR, durationMin = 64, volumeKg = 6740.0, totalSets = 20, kcal = 510, prCount = 0, type = SessionType.GYM),
     )
 
-    val personalRecords = listOf(
-        PersonalRecord("Bench press", bestKg = 72.5, improvementKg = 2.5),
-        PersonalRecord("Squat", bestKg = 110.0, improvementKg = 5.0),
-        PersonalRecord("Deadlift", bestKg = 140.0, improvementKg = 5.0),
-        PersonalRecord("Overhead press", bestKg = 47.5, improvementKg = 2.5),
+    // Owner-provisioned workout templates a member can pull into a live session (Cambodian iron-gym
+    // staples). Guidance only — the member logs their own real sets against them.
+    val workoutPlans = listOf(
+        WorkoutPlan(
+            "wp_push", "Push day", listOf(
+                PlannedExercise("Bench press", 4, 8),
+                PlannedExercise("Overhead press", 3, 8),
+                PlannedExercise("Incline dumbbell press", 3, 10),
+                PlannedExercise("Triceps pushdown", 3, 12),
+            ),
+        ),
+        WorkoutPlan(
+            "wp_pull", "Pull day", listOf(
+                PlannedExercise("Deadlift", 3, 5),
+                PlannedExercise("Barbell row", 4, 8),
+                PlannedExercise("Lat pulldown", 3, 10),
+                PlannedExercise("Barbell curl", 3, 12),
+            ),
+        ),
+        WorkoutPlan(
+            "wp_legs", "Leg day", listOf(
+                PlannedExercise("Squat", 4, 6),
+                PlannedExercise("Romanian deadlift", 3, 8),
+                PlannedExercise("Leg press", 3, 12),
+                PlannedExercise("Calf raise", 4, 15),
+            ),
+        ),
+        WorkoutPlan(
+            "wp_full", "Full body", listOf(
+                PlannedExercise("Squat", 3, 8),
+                PlannedExercise("Bench press", 3, 8),
+                PlannedExercise("Barbell row", 3, 8),
+                PlannedExercise("Pull-ups", 3, 10),
+            ),
+        ),
     )
-
-    // 90 days of total volume lifted, trending upward. Range queries return the tail of this.
-    val volumeTrend: List<VolumePoint> = (89 downTo 0).map { d ->
-        val dayIndex = 90 - d // 1..90, ascending toward today
-        val base = 2600.0 + dayIndex * 26.0
-        val wobble = ((dayIndex * 37) % 11 - 5) * 55.0
-        VolumePoint(date = now - d * DAY, volumeKg = (base + wobble).coerceAtLeast(1800.0))
-    }
 
     // Gym-dominant rotation (Cambodian iron-gym culture), repeated across the history.
     private val sessionCycle = listOf(

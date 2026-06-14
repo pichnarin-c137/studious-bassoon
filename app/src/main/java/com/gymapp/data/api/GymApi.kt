@@ -24,6 +24,7 @@ import com.gymapp.data.model.WeeklyTargetRequest
 import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WeeklyActivity
 import com.gymapp.data.model.WorkoutLogEntry
+import com.gymapp.data.model.WorkoutPlan
 import com.gymapp.data.model.WorkoutSession
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -74,6 +75,9 @@ interface GymApi {
 
     @GET("progress/workouts")
     suspend fun getWorkoutLogs(): List<WorkoutLogEntry>
+
+    @GET("progress/plans")
+    suspend fun getWorkoutPlans(): List<WorkoutPlan>
 
     @GET("progress/sessions/recent")
     suspend fun getRecentSession(): WorkoutSession

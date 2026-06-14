@@ -12,6 +12,7 @@ import com.gymapp.data.model.VisitStats
 import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WeeklyActivity
 import com.gymapp.data.model.WorkoutLogEntry
+import com.gymapp.data.model.WorkoutPlan
 import com.gymapp.data.model.WorkoutSession
 import com.gymapp.data.repository.CheckInRepository
 import com.gymapp.data.repository.ProgressRepository
@@ -139,6 +140,7 @@ private class FakeProgressRepository(
     private val afterLog: StreakState,
 ) : ProgressRepository {
     override suspend fun getWorkoutLogs(): List<WorkoutLogEntry> = emptyList()
+    override suspend fun getWorkoutPlans(): List<WorkoutPlan> = emptyList()
     override suspend fun getRecentSession(): WorkoutSession = recent
     override suspend fun getPersonalRecords(): List<PersonalRecord> = emptyList()
     override suspend fun getVolumeTrend(days: Int): List<VolumePoint> = emptyList()

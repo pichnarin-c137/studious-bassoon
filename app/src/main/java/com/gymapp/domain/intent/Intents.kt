@@ -2,6 +2,7 @@ package com.gymapp.domain.intent
 
 import com.gymapp.data.model.SessionType
 import com.gymapp.data.model.TimeRange
+import com.gymapp.data.model.WorkoutPlan
 import com.gymapp.domain.model.AppLanguage
 import com.gymapp.domain.model.ThemeMode
 
@@ -58,6 +59,8 @@ sealed interface SessionIntent {
     data object RemoveLastSet : SessionIntent
     data class StartRest(val seconds: Int) : SessionIntent
     data object StopRest : SessionIntent
+    /** Pull an owner template in as an agenda (or null to go freeform). */
+    data class SelectPlan(val plan: WorkoutPlan?) : SessionIntent
     data class Finish(val note: String) : SessionIntent
 }
 

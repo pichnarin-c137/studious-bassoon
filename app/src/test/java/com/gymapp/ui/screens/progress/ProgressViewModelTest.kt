@@ -11,6 +11,7 @@ import com.gymapp.data.model.TrainingDay
 import com.gymapp.data.model.VisitStats
 import com.gymapp.data.model.VolumePoint
 import com.gymapp.data.model.WorkoutLogEntry
+import com.gymapp.data.model.WorkoutPlan
 import com.gymapp.data.model.WorkoutSession
 import com.gymapp.data.repository.ProgressRepository
 import com.gymapp.domain.intent.ProgressIntent
@@ -108,6 +109,15 @@ class ProgressViewModelTest {
         advanceUntilIdle()
         assertEquals(6, loaded(vm).streak.weeklyTarget)
     }
+
+    @Test
+    fun `load surfaces personal records from the repository`() = runTest(dispatcher) {
+        val vm = viewModel()
+        advanceUntilIdle()
+        val prs = loaded(vm).personalRecords
+        assertEquals(1, prs.size)
+        assertEquals("Bench press", prs[0].exercise)
+    }
 }
 
 private class FakeProgressRepository(
@@ -116,8 +126,10 @@ private class FakeProgressRepository(
     private val recent: WorkoutSession,
 ) : ProgressRepository {
     override suspend fun getWorkoutLogs(): List<WorkoutLogEntry> = emptyList()
+    override suspend fun getWorkoutPlans(): List<WorkoutPlan> = emptyList()
     override suspend fun getRecentSession(): WorkoutSession = recent
-    override suspend fun getPersonalRecords(): List<PersonalRecord> = emptyList()
+    override suspend fun getPersonalRecords(): List<PersonalRecord> =
+        listOf(PersonalRecord("Bench press", bestKg = 80.0, improvementKg = 5.0))
     override suspend fun getVolumeTrend(days: Int): List<VolumePoint> = emptyList()
     override suspend fun getTrainingDays(days: Int): List<TrainingDay> = allDays.takeLast(days)
     override suspend fun getVisitStats(): VisitStats = VisitStats(totalVisits = 80, visitsThisMonth = 11, lastVisit = 7L)

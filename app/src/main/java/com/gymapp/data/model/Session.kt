@@ -36,6 +36,7 @@ data class StoredSession(
     val performedAt: Long,
     val exercises: List<LoggedExercise> = emptyList(),
     val note: String? = null,
+    val prCount: Int = 0,
 )
 
 /**
@@ -58,7 +59,7 @@ fun StoredSession.toWorkoutSession(): WorkoutSession {
         volumeKg = volume,
         totalSets = totalSets,
         kcal = 0,
-        prCount = 0,
+        prCount = prCount,
         type = type,
     )
 }
